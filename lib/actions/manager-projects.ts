@@ -147,32 +147,36 @@ export async function createTask(
     dueDate: string;
     assigneeId: string | null;
   }
-) {
-  const session = await requireOwnedProject(projectId);
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await requireOwnedProject(projectId);
 
-  const task = await prisma.task.create({
-    data: {
-      title: data.title,
-      description: data.description,
-      priority: data.priority,
-      status: data.status,
-      dueDate: new Date(data.dueDate),
-      assigneeId: data.assigneeId || null,
-      projectId,
-      creatorId: session.user.id,
-    },
-  });
+    const task = await prisma.task.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        status: data.status,
+        dueDate: new Date(data.dueDate),
+        assigneeId: data.assigneeId || null,
+        projectId,
+        creatorId: session.user.id,
+      },
+    });
 
-  if (data.assigneeId) {
-    await createNotification(
-      data.assigneeId,
-      "TASK_ASSIGNED",
-      `You were assigned a new task: "${data.title}"`
-    );
+    if (data.assigneeId) {
+      await createNotification(
+        data.assigneeId,
+        "TASK_ASSIGNED",
+        `You were assigned a new task: "${data.title}"`
+      );
+    }
+
+    revalidatePath(`/manager/projects/${projectId}`);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to create task" };
   }
-
-  revalidatePath(`/manager/projects/${projectId}`);
-  return { success: true };
 }
 
 export async function updateTask(
@@ -186,34 +190,38 @@ export async function updateTask(
     dueDate: string;
     assigneeId: string | null;
   }
-) {
-  await requireOwnedProject(projectId);
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await requireOwnedProject(projectId);
 
-  const previousTask = await prisma.task.findUnique({ where: { id: taskId } });
+    const previousTask = await prisma.task.findUnique({ where: { id: taskId } });
 
-  await prisma.task.update({
-    where: { id: taskId },
-    data: {
-      title: data.title,
-      description: data.description,
-      priority: data.priority,
-      status: data.status,
-      dueDate: new Date(data.dueDate),
-      assigneeId: data.assigneeId || null,
-    },
-  });
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        status: data.status,
+        dueDate: new Date(data.dueDate),
+        assigneeId: data.assigneeId || null,
+      },
+    });
 
-  // Notify only if the assignee changed to someone new
-  if (data.assigneeId && data.assigneeId !== previousTask?.assigneeId) {
-    await createNotification(
-      data.assigneeId,
-      "TASK_ASSIGNED",
-      `You were assigned to task: "${data.title}"`
-    );
+    // Notify only if the assignee changed to someone new
+    if (data.assigneeId && data.assigneeId !== previousTask?.assigneeId) {
+      await createNotification(
+        data.assigneeId,
+        "TASK_ASSIGNED",
+        `You were assigned to task: "${data.title}"`
+      );
+    }
+
+    revalidatePath(`/manager/projects/${projectId}`);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to update task" };
   }
-
-  revalidatePath(`/manager/projects/${projectId}`);
-  return { success: true };
 }
 
 export async function deleteTask(taskId: string, projectId: string) {

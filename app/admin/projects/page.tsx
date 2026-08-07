@@ -61,119 +61,90 @@ export default function ProjectsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const priorityBadge = (p: string) => {
-    const styles: Record<string, string> = {
-      LOW: "bg-gray-100 text-gray-600",
-      MEDIUM: "bg-blue-100 text-blue-700",
-      HIGH: "bg-orange-100 text-orange-700",
-      URGENT: "bg-red-100 text-red-700",
-    };
-    return styles[p];
-  };
-
-  const statusBadge = (s: string) => {
-    const styles: Record<string, string> = {
-      NOT_STARTED: "bg-gray-100 text-gray-600",
-      IN_PROGRESS: "bg-indigo-100 text-indigo-700",
-      ON_HOLD: "bg-amber-100 text-amber-700",
-      COMPLETED: "bg-green-100 text-green-700",
-    };
-    return styles[s];
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Project Management</h1>
-            <p className="text-gray-500 text-sm">Create and monitor all projects</p>
-          </div>
-          <button
-            onClick={() => {
-              setEditingProject(null);
-              setModalOpen(true);
-            }}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-          >
-            + New Project
-          </button>
+    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Project Management</h1>
+          <p className="text-gray-400 text-xs mt-1">Create and monitor all system projects</p>
         </div>
+        <button
+          onClick={() => {
+            setEditingProject(null);
+            setModalOpen(true);
+          }}
+          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl text-xs hover:bg-blue-500 shadow-lg shadow-blue-600/25 transition"
+        >
+          + New Project
+        </button>
+      </div>
 
-        <div className="flex gap-3 mb-4">
-          <input
-            type="text"
-            placeholder="Search projects..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="ALL">All Status</option>
-            <option value="NOT_STARTED">Not Started</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="ON_HOLD">On Hold</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-        </div>
+      <div className="flex gap-3">
+        <input
+          type="text"
+          placeholder="Search projects..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 bg-[#131725] border border-[#22293F] text-white px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-blue-500"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-[#131725] border border-[#22293F] text-white px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-blue-500"
+        >
+          <option value="ALL">All Status</option>
+          <option value="NOT_STARTED">Not Started</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="ON_HOLD">On Hold</option>
+          <option value="COMPLETED">Completed</option>
+        </select>
+      </div>
 
-        {loading ? (
-          <p className="text-center text-gray-400 py-8">Loading...</p>
-        ) : filteredProjects.length === 0 ? (
-          <p className="text-center text-gray-400 py-8">No projects found</p>
-        ) : (
-          <div className="grid gap-4">
-            {filteredProjects.map((project) => (
-              <div key={project.id} className="bg-white rounded-2xl shadow p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-lg text-gray-800">{project.name}</h3>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityBadge(project.priority)}`}>
-                        {project.priority}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(project.status)}`}>
-                        {project.status.replace("_", " ")}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-sm mb-2">{project.description}</p>
-                    <div className="flex gap-4 text-sm text-gray-400">
-                      <span>👤 PM: {project.manager.name}</span>
-                      <span>📋 {project._count.tasks} tasks</span>
-                      <span>👥 {project._count.members} members</span>
-                      <span>
-                        📅 {new Date(project.startDate).toLocaleDateString()} -{" "}
-                        {new Date(project.endDate).toLocaleDateString()}
-                      </span>
-                    </div>
+      {loading ? (
+        <p className="text-center text-gray-500 py-8 text-xs">Loading projects...</p>
+      ) : filteredProjects.length === 0 ? (
+        <p className="text-center text-gray-500 py-8 text-xs">No projects found</p>
+      ) : (
+        <div className="grid gap-4">
+          {filteredProjects.map((project) => (
+            <div key={project.id} className="bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-base text-white">{project.name}</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                      {project.status.replace("_", " ")}
+                    </span>
                   </div>
-                  <div className="flex gap-3 ml-4">
-                    <button
-                      onClick={() => {
-                        setEditingProject(project);
-                        setModalOpen(true);
-                      }}
-                      className="text-indigo-600 hover:underline text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      className="text-red-500 hover:underline text-sm"
-                    >
-                      Delete
-                    </button>
+                  <p className="text-gray-400 text-xs mb-3">{project.description}</p>
+                  <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                    <span>👤 Manager: {project.manager.name}</span>
+                    <span>📋 {project._count.tasks} tasks</span>
+                    <span>👥 {project._count.members} members</span>
                   </div>
                 </div>
+                <div className="flex gap-3 ml-4 text-xs">
+                  <button
+                    onClick={() => {
+                      setEditingProject(project);
+                      setModalOpen(true);
+                    }}
+                    className="text-blue-400 hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(project.id)}
+                    className="text-red-400 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <ProjectModal
         isOpen={modalOpen}

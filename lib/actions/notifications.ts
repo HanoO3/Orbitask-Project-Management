@@ -57,3 +57,61 @@ export async function markAllNotificationsRead() {
 
   revalidatePath("/");
 }
+
+export async function deleteNotification(id: string) {
+  const session = await auth();
+  if (!session?.user) return;
+
+  await prisma.notification.deleteMany({
+    where: { id, userId: session.user.id },
+  });
+
+  revalidatePath("/");
+}
+
+export async function clearAllNotifications() {
+  const session = await auth();
+  if (!session?.user) return;
+
+  await prisma.notification.deleteMany({
+    where: { userId: session.user.id },
+  });
+
+  revalidatePath("/");
+}
+
+export async function checkApproachingDeadlines() {
+  const session = await auth();
+  if (!session?.user) return;
+
+  const now = new Date();
+  const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  // Find non-completed tasks assigned to the user due within the next 24 hours
+  const upcomingTasks = await prisma.task.findMany({
+    where: {
+      assigneeId: session.user.id,
+      status: { not: "COMPLETED" },
+      dueDate: { gte: now, lte: next24Hours },
+    },
+    include: { project: true },
+  });
+
+  for (const task of upcomingTasks) {
+    const existingNotif = await prisma.notification.findFirst({
+      where: {
+        userId: session.user.id,
+        type: "DEADLINE_APPROACHING",
+        message: { contains: task.title },
+      },
+    });
+
+    if (!existingNotif) {
+      await createNotification(
+        session.user.id,
+        "DEADLINE_APPROACHING",
+        `Deadline approaching for task "${task.title}" in ${task.project.name}`
+      );
+    }
+  }
+}

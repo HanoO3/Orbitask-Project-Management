@@ -1,70 +1,118 @@
-import { getMyProjects, getMyProjectStats } from "@/lib/actions/manager-projects";
-import { auth } from "@/lib/auth";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { LogoutButton } from "@/components/logout-button";
+import { useSession } from "next-auth/react";
+import { getMyProjects, getMyProjectStats } from "@/lib/actions/manager-projects";
+import { NotificationBell } from "@/components/notification-bell";
+import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 
-const priorityBadge = (p: string) => {
-  const styles: Record<string, string> = {
-    LOW: "bg-gray-100 text-gray-600",
-    MEDIUM: "bg-blue-100 text-blue-700",
-    HIGH: "bg-orange-100 text-orange-700",
-    URGENT: "bg-red-100 text-red-700",
-  };
-  return styles[p];
+type Project = {
+  id: string;
+  name: string;
+  description: string;
+  startDate: string | Date;
+  endDate: string | Date;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  status: "NOT_STARTED" | "IN_PROGRESS" | "ON_HOLD" | "COMPLETED";
+  _count: { tasks: number; members: number };
+  tasks: { id: string; status: string }[];
 };
 
-const statusBadge = (s: string) => {
-  const styles: Record<string, string> = {
-    NOT_STARTED: "bg-gray-100 text-gray-600",
-    IN_PROGRESS: "bg-indigo-100 text-indigo-700",
-    ON_HOLD: "bg-amber-100 text-amber-700",
-    COMPLETED: "bg-green-100 text-green-700",
-  };
-  return styles[s];
-};
+function formatDate(d: string | Date) {
+  if (!d) return "";
+  const dateObj = new Date(d);
+  if (isNaN(dateObj.getTime())) return "";
+  return dateObj.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
 
-export default async function ManagerDashboard() {
-  const session = await auth();
-  const [projects, stats] = await Promise.all([getMyProjects(), getMyProjectStats()]);
+export default function ManagerDashboard() {
+  const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    activeProjects: 0,
+    pendingTasks: 0,
+    completedTasks: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const [projectsData, statsData] = await Promise.all([getMyProjects(), getMyProjectStats()]);
+    setProjects(projectsData as any);
+    setStats(statsData);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  const userName = session?.user?.name ? session.user.name.split(" ")[0] : "Manager";
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-1">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Project Manager Dashboard
-          </h1>
-          <LogoutButton />
-        </div>
-        <p className="text-gray-500 mb-6">Welcome back, {session?.user?.name}</p>
+    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <DashboardGreeting
+          userName={userName}
+          subtitle="Track and manage your team's assigned projects"
+        />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl shadow p-5">
-            <p className="text-gray-400 text-sm">Total Projects</p>
-            <p className="text-2xl font-bold text-gray-800">{stats.totalProjects}</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-5">
-            <p className="text-gray-400 text-sm">Active Projects</p>
-            <p className="text-2xl font-bold text-indigo-600">{stats.activeProjects}</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-5">
-            <p className="text-gray-400 text-sm">Pending Tasks</p>
-            <p className="text-2xl font-bold text-amber-600">{stats.pendingTasks}</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-5">
-            <p className="text-gray-400 text-sm">Completed Tasks</p>
-            <p className="text-2xl font-bold text-green-600">{stats.completedTasks}</p>
+        <div className="flex items-center gap-3 shrink-0">
+          <NotificationBell />
+          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
+            {session?.user?.name
+              ? session.user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
+              : "PM"}
           </div>
         </div>
+      </div>
 
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">My Assigned Projects</h2>
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+          <p className="text-xs font-medium text-gray-400">Total Projects</p>
+          <p className="text-3xl font-extrabold text-white mt-2">{stats.totalProjects}</p>
+        </div>
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+          <p className="text-xs font-medium text-gray-400">Active Projects</p>
+          <p className="text-3xl font-extrabold text-blue-400 mt-2">{stats.activeProjects}</p>
+        </div>
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+          <p className="text-xs font-medium text-gray-400">Pending Tasks</p>
+          <p className="text-3xl font-extrabold text-amber-400 mt-2">{stats.pendingTasks}</p>
+        </div>
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+          <p className="text-xs font-medium text-gray-400">Completed Tasks</p>
+          <p className="text-3xl font-extrabold text-emerald-400 mt-2">{stats.completedTasks}</p>
+        </div>
+      </div>
 
-        {projects.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow p-8 text-center text-gray-400">
-            No projects assigned yet. Ask your Administrator to assign one.
-          </div>
+      {/* Projects List */}
+      <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+        <h2 className="text-lg font-bold text-white mb-4">My Assigned Projects</h2>
+
+        {loading ? (
+          <p className="text-xs text-gray-500 py-6">Loading projects...</p>
+        ) : projects.length === 0 ? (
+          <p className="text-xs text-gray-500 py-6">No projects assigned yet.</p>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             {projects.map((project) => {
               const completedTasks = project.tasks.filter((t) => t.status === "COMPLETED").length;
               const totalTasks = project.tasks.length;
@@ -74,37 +122,30 @@ export default async function ManagerDashboard() {
                 <Link
                   key={project.id}
                   href={`/manager/projects/${project.id}`}
-                  className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition block"
+                  className="bg-[#0B0E17]/60 border border-[#1E253B] p-5 rounded-2xl hover:border-blue-500/50 transition block space-y-3"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg text-gray-800">{project.name}</h3>
-                    <div className="flex gap-2">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityBadge(project.priority)}`}>
-                        {project.priority}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(project.status)}`}>
-                        {project.status.replace("_", " ")}
-                      </span>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-base text-white">{project.name}</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                      {project.status.replace("_", " ")}
+                    </span>
                   </div>
-                  <p className="text-gray-500 text-sm mb-3">{project.description}</p>
+                  <p className="text-xs text-gray-400 line-clamp-2">{project.description}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
                     <span>📋 {project._count.tasks} tasks</span>
                     <span>👥 {project._count.members} members</span>
-                    <span>
-                      📅 {new Date(project.startDate).toLocaleDateString()} -{" "}
-                      {new Date(project.endDate).toLocaleDateString()}
+                    <span suppressHydrationWarning>
+                      📅 {mounted ? formatDate(project.startDate) : ""} - {mounted ? formatDate(project.endDate) : ""}
                     </span>
                   </div>
 
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full transition-all"
-                      style={{ width: `${progress}%` }}
-                    />
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-[#181F33] rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-blue-500 h-full rounded-full" style={{ width: `${progress}%` }} />
+                    </div>
+                    <span className="text-[11px] font-bold text-gray-400">{progress}%</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">{progress}% complete</p>
                 </Link>
               );
             })}

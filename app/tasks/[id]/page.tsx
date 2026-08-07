@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState, use, useCallback } from "react";
-import Link from "next/link";
-import { getTaskDetail, addTaskComment } from "@/lib/actions/task-comments";
-import { useSession } from "next-auth/react";
+import { useEffect, useState, use, useCallback } from 'react';
+import Link from 'next/link';
+import { getTaskDetail, addTaskComment } from '@/lib/actions/task-comments';
+import { useSession } from 'next-auth/react';
+import { NotificationBell } from '@/components/notification-bell';
+import { ArrowLeft, Calendar, User, MessageSquare, Send } from 'lucide-react';
 
 type Comment = {
   id: string;
@@ -16,8 +18,8 @@ type TaskDetail = {
   id: string;
   title: string;
   description: string;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  status: "TODO" | "IN_PROGRESS" | "REVIEW" | "COMPLETED";
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  status: 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED';
   dueDate: string | Date;
   project: { id: string; name: string; managerId: string };
   assignee: { id: string; name: string; email: string } | null;
@@ -27,31 +29,22 @@ type TaskDetail = {
 
 const priorityBadge = (p: string) => {
   const styles: Record<string, string> = {
-    LOW: "bg-gray-100 text-gray-600",
-    MEDIUM: "bg-blue-100 text-blue-700",
-    HIGH: "bg-orange-100 text-orange-700",
-    URGENT: "bg-red-100 text-red-700",
+    LOW: 'bg-slate-700/50 text-slate-300 border border-slate-600/40',
+    MEDIUM: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    HIGH: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+    URGENT: 'bg-rose-500/20 text-rose-400 border border-rose-500/30',
   };
-  return styles[p] || "bg-gray-100 text-gray-600";
+  return styles[p] || 'bg-slate-700/50 text-slate-300';
 };
 
 const statusBadge = (s: string) => {
   const styles: Record<string, string> = {
-    TODO: "bg-gray-100 text-gray-600",
-    IN_PROGRESS: "bg-indigo-100 text-indigo-700",
-    REVIEW: "bg-amber-100 text-amber-700",
-    COMPLETED: "bg-green-100 text-green-700",
+    TODO: 'bg-slate-700/50 text-slate-300 border border-slate-600/40',
+    IN_PROGRESS: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    REVIEW: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
+    COMPLETED: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
   };
-  return styles[s] || "bg-gray-100 text-gray-600";
-};
-
-const roleBadge = (role: string) => {
-  const styles: Record<string, string> = {
-    ADMIN: "bg-purple-100 text-purple-700",
-    PROJECT_MANAGER: "bg-blue-100 text-blue-700",
-    TEAM_MEMBER: "bg-green-100 text-green-700",
-  };
-  return styles[role] || "bg-gray-100 text-gray-700";
+  return styles[s] || 'bg-slate-700/50 text-slate-300';
 };
 
 export default function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -60,158 +53,136 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
 
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [comment, setComment] = useState("");
-  const [posting, setPosting] = useState(false);
-  const [error, setError] = useState("");
+  const [newComment, setNewComment] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [commentError, setCommentError] = useState('');
 
-  const loadTask = useCallback(async (isSilent = false) => {
-    if (!isSilent) setLoading(true);
-    try {
-      const data = await getTaskDetail(taskId);
-      setTask(data as TaskDetail);
-      setError("");
-    } catch (e: any) {
-      if (!isSilent) setError(e.message || "Failed to load task");
-    } finally {
-      if (!isSilent) setLoading(false);
-    }
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const data = await getTaskDetail(taskId);
+    setTask(data as TaskDetail | null);
+    setLoading(false);
   }, [taskId]);
 
   useEffect(() => {
-    void loadTask(false);
+    void loadData();
+  }, [loadData]);
 
-    // Auto-refresh comments every 5 seconds silently
-    const interval = setInterval(() => {
-      void loadTask(true);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [loadTask]);
-
-  const handlePostComment = async (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return;
-    setPosting(true);
-    const result = await addTaskComment(taskId, comment);
-    setPosting(false);
-    if (result.success) {
-      setComment("");
-      await loadTask(true);
+    if (!newComment.trim()) return;
+
+    setSubmittingComment(true);
+    setCommentError('');
+
+    const res = await addTaskComment(taskId, newComment.trim());
+
+    setSubmittingComment(false);
+
+    if (res.error) {
+      setCommentError(res.error);
+    } else {
+      setNewComment('');
+      loadData();
     }
   };
 
-  const backLink =
-    session?.user?.role === "ADMIN"
-      ? "/admin/projects"
-      : session?.user?.role === "PROJECT_MANAGER"
-      ? `/manager/projects/${task?.project.id || ""}`
-      : "/member/dashboard";
-
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 p-8 text-center text-gray-400">Loading task details...</div>;
+    return <div className="min-h-screen bg-[#0B0D1A] p-8 text-center text-[#8E95AF]">Loading task details...</div>;
   }
 
-  if (error || !task) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-8 text-center">
-        <div className="max-w-md mx-auto bg-white p-6 rounded-2xl shadow">
-          <p className="text-red-500 font-medium mb-4">{error || "Task not found"}</p>
-          <Link href="/member/dashboard" className="text-indigo-600 hover:underline text-sm">
-            ← Return to Dashboard
-          </Link>
-        </div>
-      </div>
-    );
+  if (!task) {
+    return <div className="min-h-screen bg-[#0B0D1A] p-8 text-center text-[#8E95AF]">Task not found.</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-[#0B0D1A] text-white p-4 md:p-8 space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <Link href={backLink} className="text-indigo-600 text-sm hover:underline">
-            ← Back to Dashboard
+          <Link href="/tasks" className="flex items-center gap-2 text-xs font-semibold text-[#5B82FF] hover:underline">
+            <ArrowLeft className="w-4 h-4" /> Back to Tasks
           </Link>
-          <button
-            onClick={() => void loadTask(true)}
-            className="text-xs text-gray-500 hover:text-indigo-600"
-          >
-            🔄 Refresh
-          </button>
+          <NotificationBell />
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-6 mt-4 mb-6">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <h1 className="text-xl font-bold text-gray-800">{task.title}</h1>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityBadge(task.priority)}`}>
-              {task.priority}
-            </span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge(task.status)}`}>
-              {task.status.replace("_", " ")}
-            </span>
+        {/* Task Details Card */}
+        <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-[#5B82FF] uppercase tracking-wider">
+                {task.project.name}
+              </span>
+              <h1 className="text-2xl font-extrabold text-white">{task.title}</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${priorityBadge(task.priority)}`}>
+                {task.priority}
+              </span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusBadge(task.status)}`}>
+                {task.status.replace('_', ' ')}
+              </span>
+            </div>
           </div>
-          <p className="text-gray-600 mb-4">{task.description}</p>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-            <span>📁 {task.project?.name}</span>
-            <span>👤 Assignee: {task.assignee?.name || "Unassigned"}</span>
-            <span>📅 Due {new Date(task.dueDate).toLocaleDateString()}</span>
-            <span>✍️ Created by {task.creator?.name || "Unknown"}</span>
+
+          <p className="text-sm text-[#8E95AF] leading-relaxed">{task.description || 'No description provided.'}</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#23263A] text-xs text-[#8E95AF]">
+            <div>
+              <span className="block text-[10px] uppercase font-semibold text-[#626A86]">Assignee</span>
+              <span className="font-bold text-white mt-0.5 block">{task.assignee ? task.assignee.name : 'Unassigned'}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] uppercase font-semibold text-[#626A86]">Creator</span>
+              <span className="font-bold text-white mt-0.5 block">{task.creator.name}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] uppercase font-semibold text-[#626A86]">Due Date</span>
+              <span className="font-bold text-white mt-0.5 block">{new Date(task.dueDate).toLocaleDateString()}</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-6">
-          <h2 className="font-semibold text-gray-800 mb-4">
-            Task Discussion ({task.comments.length})
+        {/* Comments Stream */}
+        <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-xl space-y-6">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-[#5B82FF]" /> Activity & Comments ({task.comments.length})
           </h2>
 
-          <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+          <div className="space-y-3">
             {task.comments.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-4">
-                No discussion yet. Start the conversation below.
-              </p>
+              <p className="text-xs text-[#8E95AF]">No comments yet. Be the first to start the discussion.</p>
             ) : (
-              task.comments.map((c) => {
-                const userName = c.user?.name || "Unknown User";
-                const userRole = c.user?.role || "TEAM_MEMBER";
-                const initial = userName.charAt(0).toUpperCase();
-
-                return (
-                  <div key={c.id} className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-medium shrink-0">
-                      {initial}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-800">{userName}</span>
-                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${roleBadge(userRole)}`}>
-                          {userRole.replace("_", " ")}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(c.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mt-1">{c.content}</p>
-                    </div>
+              task.comments.map((c) => (
+                <div key={c.id} className="p-4 rounded-xl bg-[#0B0D1A] border border-[#23263A] space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-white">{c.user?.name || 'System User'}</span>
+                    <span className="text-[10px] text-[#626A86]">{new Date(c.createdAt).toLocaleString()}</span>
                   </div>
-                );
-              })
+                  <p className="text-xs text-[#8E95AF] leading-relaxed mt-1">{c.content}</p>
+                </div>
+              ))
             )}
           </div>
 
-          <form onSubmit={handlePostComment} className="flex gap-2">
-            <input
-              type="text"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+          {/* Add Comment Form */}
+          <form onSubmit={handleAddComment} className="space-y-3 pt-4 border-t border-[#23263A]">
+            {commentError && <div className="p-2 bg-rose-500/20 text-rose-300 text-xs rounded-lg">{commentError}</div>}
+            <textarea
+              rows={3}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
               placeholder="Write a comment..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl p-3 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
             />
-            <button
-              type="submit"
-              disabled={posting || !comment.trim()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm"
-            >
-              {posting ? "Posting..." : "Post"}
-            </button>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={submittingComment || !newComment.trim()}
+                className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md disabled:opacity-40"
+              >
+                <Send className="w-3.5 h-3.5" /> Post Comment
+              </button>
+            </div>
           </form>
         </div>
       </div>

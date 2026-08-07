@@ -27,6 +27,24 @@ export async function getUsers() {
   });
 }
 
+export async function getWorkspaceUsers() {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  return prisma.user.findMany({
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      avatar: true,
+    },
+  });
+}
+
 export async function createUser(data: {
   name: string;
   email: string;

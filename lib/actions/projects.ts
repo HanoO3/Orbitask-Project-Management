@@ -23,6 +23,69 @@ export async function getProjects() {
   });
 }
 
+export async function getUserProjects() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const userId = session.user.id;
+  const role = session.user.role;
+
+  let whereClause: any = {};
+  if (role === "PROJECT_MANAGER") {
+    whereClause = {
+      OR: [
+        { managerId: userId },
+        { members: { some: { userId } } }
+      ]
+    };
+  } else if (role === "TEAM_MEMBER") {
+    whereClause = {
+      members: { some: { userId } }
+    };
+  }
+
+  const projects = await prisma.project.findMany({
+    where: whereClause,
+    orderBy: { createdAt: "desc" },
+    include: {
+      manager: { select: { id: true, name: true, email: true } },
+      members: {
+        include: {
+          user: { select: { id: true, name: true, email: true } }
+        }
+      },
+      tasks: {
+        select: { id: true, status: true }
+      }
+    }
+  });
+
+  return projects.map((p) => {
+    const totalTasks = p.tasks.length;
+    const completedTasks = p.tasks.filter((t) => t.status === "COMPLETED").length;
+    const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    let displayStatus: "On track" | "At risk" | "Delayed" | "Completed" = "On track";
+    if (p.status === "COMPLETED") {
+      displayStatus = "Completed";
+    } else if (p.status === "ON_HOLD") {
+      displayStatus = "At risk";
+    } else if (new Date(p.endDate) < new Date() && progress < 100) {
+      displayStatus = "Delayed";
+    } else if (p.priority === "URGENT") {
+      displayStatus = "At risk";
+    }
+
+    return {
+      ...p,
+      progress,
+      displayStatus,
+    };
+  });
+}
+
 export async function getProjectManagers() {
   await requireAdmin();
   return prisma.user.findMany({

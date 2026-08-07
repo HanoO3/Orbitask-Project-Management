@@ -10,15 +10,18 @@ export default auth((req) => {
   const userRole = req.auth?.user?.role;
 
   const isLoginPage = nextUrl.pathname === "/login";
+  const isSignupPage = nextUrl.pathname === "/signup";
+  const isAuthPage = isLoginPage || isSignupPage;
+
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isManagerRoute = nextUrl.pathname.startsWith("/manager");
   const isMemberRoute = nextUrl.pathname.startsWith("/member");
 
-  if (!isLoggedIn && !isLoginPage) {
+  if (!isLoggedIn && !isAuthPage) {
     return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
-  if (isLoggedIn && isLoginPage) {
+  if (isLoggedIn && isAuthPage) {
     return NextResponse.redirect(new URL(getRoleHome(userRole), nextUrl));
   }
 

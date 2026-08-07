@@ -96,3 +96,61 @@ export async function addTaskComment(taskId: string, content: string) {
   }
   return { success: true };
 }
+
+export async function getUserWorkspaceTasks() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const userId = session.user.id;
+  const role = session.user.role;
+
+  let whereClause: any = {};
+
+  if (role === "PROJECT_MANAGER") {
+    whereClause = {
+      OR: [
+        { project: { managerId: userId } },
+        { assigneeId: userId },
+        { creatorId: userId },
+      ],
+    };
+  } else if (role === "TEAM_MEMBER") {
+    whereClause = {
+      OR: [
+        { assigneeId: userId },
+        { project: { members: { some: { userId } } } },
+      ],
+    };
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: whereClause,
+    orderBy: { dueDate: "asc" },
+    include: {
+      project: { select: { id: true, name: true } },
+      assignee: { select: { id: true, name: true, email: true } },
+      creator: { select: { id: true, name: true } },
+    },
+  });
+
+  return tasks;
+}
+
+export async function toggleTaskStatus(taskId: string) {
+  const { task } = await requireTaskAccess(taskId);
+
+  const newStatus = task.status === "COMPLETED" ? "TODO" : "COMPLETED";
+
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { status: newStatus },
+  });
+
+  revalidatePath("/tasks");
+  revalidatePath(`/tasks/${taskId}`);
+  revalidatePath("/member/dashboard");
+  revalidatePath("/manager/dashboard");
+  return { success: true, newStatus };
+}

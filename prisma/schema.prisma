@@ -65,6 +65,7 @@ model User {
   createdTasks       Task[]          @relation("TaskCreator")
   taskComments       TaskComment[]
   notifications      Notification[]
+  chatMessages       ChatMessage[]   @relation("ChatSender")
 
   @@map("users")
 }
@@ -151,4 +152,16 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  channel   String
+  createdAt DateTime @default(now())
+
+  senderId String
+  sender   User   @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
 }
