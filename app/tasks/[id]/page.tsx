@@ -95,13 +95,15 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D1A] text-white p-4 md:p-8 space-y-6">
+    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <Link href="/tasks" className="flex items-center gap-2 text-xs font-semibold text-[#5B82FF] hover:underline">
             <ArrowLeft className="w-4 h-4" /> Back to Tasks
           </Link>
-          <NotificationBell />
+          <div className="hidden lg:block">
+            <NotificationBell />
+          </div>
         </div>
 
         {/* Task Details Card */}

@@ -115,10 +115,7 @@ export default function ProjectsPage() {
   const userRole = session?.user?.role;
 
   const getProjectHref = (projectId: string) => {
-    if (userRole === 'PROJECT_MANAGER') {
-      return `/manager/projects/${projectId}`;
-    }
-    return `#`;
+    return `/manager/projects/${projectId}`;
   };
 
   return (
@@ -196,7 +193,6 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredProjects.map((project, idx) => {
             const href = getProjectHref(project.id);
-            const isClickable = href !== '#';
 
             return (
               <motion.div
@@ -205,25 +201,26 @@ export default function ProjectsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.08 }}
               >
-                {isClickable ? (
-                  <Link
-                    href={href}
-                    className={`bg-[#141726] border border-[#23263A] hover:border-[#5B82FF] cursor-pointer rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all group block h-full`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shrink-0">
-                          <FolderKanban className="w-5 h-5 text-[#5B82FF] group-hover:scale-110 transition-transform" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-bold text-white group-hover:text-[#5B82FF] transition-colors">
-                            {project.name}
-                          </h3>
-                          <p className="text-xs text-[#8E95AF]">Due {formatDate(project.endDate)}</p>
-                        </div>
+                <Link
+                  href={href}
+                  className="bg-[#141726] border border-[#23263A] hover:border-[#5B82FF] active:border-[#5B82FF] active:scale-[0.99] cursor-pointer rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col justify-between transition-all group block h-full"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shrink-0 mt-0.5">
+                        <FolderKanban className="w-5 h-5 text-[#5B82FF] group-hover:scale-110 transition-transform" />
                       </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-bold text-white group-hover:text-[#5B82FF] transition-colors break-words">
+                          {project.name}
+                        </h3>
+                        <p className="text-xs text-[#8E95AF] mt-0.5">Due {formatDate(project.endDate)}</p>
+                      </div>
+                    </div>
+                    <div className="self-start shrink-0">
                       {getStatusBadge(project.displayStatus)}
                     </div>
+                  </div>
 
                     <p className="text-xs text-[#8E95AF] mb-5 leading-relaxed line-clamp-2">
                       {project.description || 'Workspace project deliverables and task tracking.'}
@@ -276,73 +273,6 @@ export default function ProjectsPage() {
                       </div>
                     </div>
                   </Link>
-                ) : (
-                  <div className={`bg-[#141726] border border-[#23263A] hover:border-[#333754] rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all group block h-full`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shrink-0">
-                          <FolderKanban className="w-5 h-5 text-[#5B82FF]" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-bold text-white">{project.name}</h3>
-                          <p className="text-xs text-[#8E95AF]">Due {formatDate(project.endDate)}</p>
-                        </div>
-                      </div>
-                      {getStatusBadge(project.displayStatus)}
-                    </div>
-
-                    <p className="text-xs text-[#8E95AF] mb-5 leading-relaxed line-clamp-2">
-                      {project.description || 'Workspace project deliverables and task tracking.'}
-                    </p>
-
-                    <div className="space-y-3 pt-4 border-t border-[#23263A]">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#8E95AF]">Manager:</span>
-                          <span className="font-semibold text-white">{project.manager?.name || 'Unassigned'}</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[#8E95AF]">Members:</span>
-                          {project.members && project.members.length > 0 ? (
-                            <div className="flex -space-x-2 overflow-hidden">
-                              {project.members.slice(0, 4).map((m, mIdx) => {
-                                const initials = getInitials(m.user.name);
-                                const colorClass = bgColors[mIdx % bgColors.length];
-                                return (
-                                  <div
-                                    key={m.user.id}
-                                    title={m.user.name}
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-[#141726] ${colorClass}`}
-                                  >
-                                    {initials}
-                                  </div>
-                                );
-                              })}
-                              {project.members.length > 4 && (
-                                <div className="w-6 h-6 rounded-full bg-[#23263A] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[#141726]">
-                                  +{project.members.length - 4}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-[#8E95AF]">None</span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-[#8E95AF]">Overall Progress</span>
-                          <span className="font-semibold text-white">{project.progress}%</span>
-                        </div>
-                        <div className="w-full bg-[#1C2035] rounded-full h-2 overflow-hidden">
-                          <div className="bg-[#4E75FF] h-full rounded-full transition-all duration-500" style={{ width: `${project.progress}%` }} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </motion.div>
             );
           })}

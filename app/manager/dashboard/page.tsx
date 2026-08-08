@@ -71,7 +71,7 @@ export default function ManagerDashboard() {
           subtitle="Track and manage your team's assigned projects"
         />
 
-        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
           <NotificationBell />
           <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
             {session?.user?.name

@@ -152,12 +152,14 @@ export default function ManagerProjectDetail({
         {/* Top bar link */}
         <div className="flex justify-between items-center">
           <Link
-            href="/manager/dashboard"
+            href="/projects"
             className="flex items-center gap-2 text-xs font-semibold text-[#5B82FF] hover:underline"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+            <ArrowLeft className="w-4 h-4" /> Back to Projects
           </Link>
-          <NotificationBell />
+          <div className="hidden lg:block">
+            <NotificationBell />
+          </div>
         </div>
 
         {/* Project Header Info */}

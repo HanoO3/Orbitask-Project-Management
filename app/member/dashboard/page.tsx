@@ -198,10 +198,11 @@ export default function MemberDashboard() {
             <span>View Tasks</span>
           </Link>
 
-          <NotificationBell />
-
-          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
-            {userInitials}
+          <div className="hidden lg:flex items-center gap-3">
+            <NotificationBell />
+            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
+              {userInitials}
+            </div>
           </div>
         </div>
       </div>

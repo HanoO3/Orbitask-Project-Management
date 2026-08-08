@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Loader2, ArrowRight } from 'lucide-react';
@@ -47,8 +47,16 @@ const monthNames = [
 ];
 
 export default function CalendarPage() {
+  const scheduleRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(() => new Date(2026, 7, 1)); // August 2026 default
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(2026, 7, 6)); // Default day 6
+
+  const handleDateClick = (cellDate: Date) => {
+    setSelectedDate(cellDate);
+    setTimeout(() => {
+      scheduleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  };
 
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<CalendarTask[]>([]);
@@ -208,7 +216,7 @@ export default function CalendarPage() {
                   <motion.div
                     key={day}
                     whileHover={{ scale: 1.02 }}
-                    onClick={() => setSelectedDate(cellDate)}
+                    onClick={() => handleDateClick(cellDate)}
                     className={`h-14 sm:h-20 md:h-24 rounded-xl p-1 sm:p-2 border transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
                       isSelected
                         ? 'bg-[#1E2540] border-[#5B82FF] shadow-[0_0_12px_rgba(91,130,255,0.3)]'
@@ -268,7 +276,11 @@ export default function CalendarPage() {
         </div>
 
         {/* Selected Day Milestones Sidebar (1 col) */}
-        <div className="lg:col-span-1 bg-[#141726] border border-[#23263A] rounded-2xl p-5 shadow-lg space-y-4">
+        <div
+          ref={scheduleRef}
+          id="schedule-section"
+          className="lg:col-span-1 bg-[#141726] border border-[#23263A] rounded-2xl p-4 sm:p-5 shadow-lg space-y-4 scroll-mt-24"
+        >
           <div className="flex items-center gap-2 border-b border-[#23263A] pb-3">
             <CalendarIcon className="w-4 h-4 text-[#5B82FF]" />
             <h3 className="font-bold text-white text-sm">
