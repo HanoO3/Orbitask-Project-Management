@@ -8,11 +8,22 @@ import {
   MessageSquare,
   Loader2,
   Search,
+  Smile,
+  Reply,
+  Trash2,
+  Paperclip,
+  X,
+  FileText,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserProjects } from '@/lib/actions/projects';
 import { getWorkspaceUsers } from '@/lib/actions/users';
-import { getChannelMessages, sendChatMessage } from '@/lib/actions/chat';
+import {
+  getChannelMessages,
+  sendChatMessage,
+  deleteChatMessage,
+  toggleMessageReaction,
+} from '@/lib/actions/chat';
 
 type WorkspaceUser = {
   id: string;
@@ -30,6 +41,7 @@ type WorkspaceProject = {
 
 type ChatMessage = {
   id: string;
+  senderId: string;
   senderName: string;
   senderInitials: string;
   senderRole?: string;
@@ -37,6 +49,10 @@ type ChatMessage = {
   text: string;
   time: string;
   isSelf: boolean;
+  isDeleted: boolean;
+  replyTo?: { id: string; senderName: string; text: string } | null;
+  reactions: { id: string; emoji: string; userId: string; userName: string }[];
+  attachments: { id: string; fileName: string; fileUrl: string; fileType: string; fileSize: number }[];
 };
 
 function getInitials(name: string) {
@@ -72,6 +88,8 @@ const colorPalette = [
   'bg-indigo-600',
 ];
 
+const EMOJI_LIST = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
+
 export default function MessagesPage() {
   const { data: session } = useSession();
   const [loadingChannels, setLoadingChannels] = useState(true);
@@ -90,6 +108,10 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
+
+  const [replyingMsg, setReplyingMsg] = useState<ChatMessage | null>(null);
+  const [selectedFile, setSelectedFile] = useState<{ fileName: string; fileUrl: string; fileType: string; fileSize: number } | null>(null);
+  const [showEmojiMenuMsgId, setShowEmojiMenuMsgId] = useState<string | null>(null);
 
   const currentUserId = session?.user?.id;
 
@@ -141,24 +163,45 @@ export default function MessagesPage() {
     try {
       const dbMsgs = await getChannelMessages(channelKey);
 
-      const formatted: ChatMessage[] = dbMsgs.map((m) => {
+      const formatted: ChatMessage[] = (dbMsgs as Array<Record<string, unknown>>).map((m) => {
+        const sender = m.sender as { name?: string; role?: string } | undefined;
+        const reactions = (m.reactions as Array<{ id: string; emoji: string; userId: string; user?: { name?: string } }>) || [];
+        const attachments = (m.attachments as Array<{ id: string; fileName: string; fileUrl: string; fileType: string; fileSize: number }>) || [];
+        const replyTo = m.replyTo as { id: string; sender?: { name?: string }; isDeleted?: boolean; content: string } | undefined;
+
         const isSelf = m.senderId === currentUserId;
-        const senderName = m.sender.name || 'User';
+        const senderName = sender?.name || 'User';
         const senderInitials = getInitials(senderName);
-        const timeStr = new Date(m.createdAt).toLocaleTimeString([], {
+        const timeStr = new Date(m.createdAt as string | Date).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
         });
 
         return {
-          id: m.id,
+          id: m.id as string,
+          senderId: m.senderId as string,
           senderName,
           senderInitials,
-          senderRole: formatRole(m.sender.role),
+          senderRole: formatRole(sender?.role),
           avatarBg: isSelf ? 'bg-[#4E75FF]' : 'bg-emerald-600',
-          text: m.content,
+          text: m.content as string,
           time: timeStr,
           isSelf,
+          isDeleted: (m.isDeleted as boolean) || false,
+          replyTo: replyTo
+            ? {
+                id: replyTo.id,
+                senderName: replyTo.sender?.name || 'User',
+                text: replyTo.isDeleted ? 'Original message deleted' : replyTo.content,
+              }
+            : null,
+          reactions: reactions.map((r) => ({
+            id: r.id,
+            emoji: r.emoji,
+            userId: r.userId,
+            userName: r.user?.name || 'User',
+          })),
+          attachments,
         };
       });
 
@@ -189,23 +232,58 @@ export default function MessagesPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim() || sending) return;
+    if ((!inputText.trim() && !selectedFile) || sending) return;
 
     const content = inputText.trim();
     setInputText('');
     setSending(true);
 
     const channelKey = getChannelKey();
+    const replyId = replyingMsg?.id;
+    const attach = selectedFile || undefined;
 
-    // Send message to PostgreSQL database via Server Action
-    const res = await sendChatMessage(channelKey, content);
+    setReplyingMsg(null);
+    setSelectedFile(null);
+
+    const res = await sendChatMessage(channelKey, content, replyId, attach);
     setSending(false);
 
     if (res.success && res.message) {
       void fetchMessagesForActiveChannel();
-    } else {
-      console.error('Failed to send message:', res.error);
     }
+  };
+
+  const handleDelete = async (msgId: string) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    await deleteChatMessage(msgId);
+    void fetchMessagesForActiveChannel();
+  };
+
+  const handleReact = async (msgId: string, emoji: string) => {
+    setShowEmojiMenuMsgId(null);
+    await toggleMessageReaction(msgId, emoji);
+    void fetchMessagesForActiveChannel();
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds maximum limit of 10MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setSelectedFile({
+        fileName: file.name,
+        fileUrl: event.target?.result as string,
+        fileType: file.type || 'application/octet-stream',
+        fileSize: file.size,
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const filteredProjects = projects.filter((p) =>
@@ -225,7 +303,6 @@ export default function MessagesPage() {
         {/* Left Channels & DM List */}
         <div className={`md:col-span-1 border-r border-[#23263A] bg-[#090B17] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           <div>
-            {/* Messages Search Bar */}
             <div className="relative mb-4">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
               <input
@@ -365,54 +442,236 @@ export default function MessagesPage() {
                 <p>Send a message below to start communicating with your team.</p>
               </div>
             ) : (
-              messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex items-start gap-3 ${
-                    msg.isSelf ? 'flex-row-reverse' : 'flex-row'
-                  }`}
-                >
+              messages.map((msg) => {
+                // Group reactions by emoji
+                const reactionGroups: Record<string, { count: number; users: string[]; hasReacted: boolean }> = {};
+                msg.reactions.forEach((r) => {
+                  if (!reactionGroups[r.emoji]) {
+                    reactionGroups[r.emoji] = { count: 0, users: [], hasReacted: false };
+                  }
+                  reactionGroups[r.emoji].count += 1;
+                  reactionGroups[r.emoji].users.push(r.userName);
+                  if (r.userId === currentUserId) reactionGroups[r.emoji].hasReacted = true;
+                });
+
+                return (
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase shadow-sm ${
-                      msg.isSelf ? 'bg-[#4E75FF]' : msg.avatarBg || 'bg-slate-700'
+                    key={msg.id}
+                    className={`group relative flex items-start gap-3 ${
+                      msg.isSelf ? 'flex-row-reverse' : 'flex-row'
                     }`}
                   >
-                    {msg.senderInitials}
-                  </div>
-                  <div
-                    className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
-                      msg.isSelf
-                        ? 'bg-[#4E75FF] text-white rounded-tr-none shadow-md'
-                        : 'bg-[#0B0D1A] text-white border border-[#23263A] rounded-tl-none'
-                    }`}
-                  >
-                    {!msg.isSelf && (
-                      <p className="font-bold text-[#5B82FF] mb-1 text-[11px]">
-                        {msg.senderName}
-                        {msg.senderRole && (
-                          <span className="text-[#8E95AF] font-normal ml-1 border-l border-[#23263A] pl-1">
-                            {msg.senderRole}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    <p>{msg.text}</p>
-                    <p
-                      className={`text-[10px] mt-1.5 text-right ${
-                        msg.isSelf ? 'text-white/70' : 'text-[#8E95AF]'
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase shadow-sm ${
+                        msg.isSelf ? 'bg-[#4E75FF]' : msg.avatarBg || 'bg-slate-700'
                       }`}
                     >
-                      {msg.time}
-                    </p>
+                      {msg.senderInitials}
+                    </div>
+
+                    <div className="relative max-w-md space-y-1">
+                      {/* Action Menu (Reply, React, Delete) */}
+                      {!msg.isDeleted && (
+                        <div
+                          className={`absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1C2035] border border-[#23263A] rounded-xl p-1 flex items-center gap-1 z-10 shadow-lg ${
+                            msg.isSelf ? 'right-full mr-2' : 'left-full ml-2'
+                          }`}
+                        >
+                          <button
+                            onClick={() => setReplyingMsg(msg)}
+                            title="Reply"
+                            className="p-1.5 hover:bg-[#2B314F] rounded-lg text-[#8E95AF] hover:text-white transition-colors"
+                          >
+                            <Reply className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setShowEmojiMenuMsgId(showEmojiMenuMsgId === msg.id ? null : msg.id)
+                              }
+                              title="React"
+                              className="p-1.5 hover:bg-[#2B314F] rounded-lg text-[#8E95AF] hover:text-white transition-colors"
+                            >
+                              <Smile className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Emoji Picker Popup */}
+                            {showEmojiMenuMsgId === msg.id && (
+                              <div className="absolute bottom-full mb-2 left-0 bg-[#0B0D1A] border border-[#23263A] rounded-xl p-2 flex gap-1 shadow-2xl z-20">
+                                {EMOJI_LIST.map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    onClick={() => handleReact(msg.id, emoji)}
+                                    className="hover:scale-125 transition-transform p-1 text-sm"
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {(msg.isSelf || session?.user?.role === 'ADMIN') && (
+                            <button
+                              onClick={() => handleDelete(msg.id)}
+                              title="Delete"
+                              className="p-1.5 hover:bg-rose-500/20 rounded-lg text-rose-400 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Quoted Reply Box */}
+                      {msg.replyTo && (
+                        <div className="bg-[#1A1E32] border-l-2 border-[#5B82FF] px-3 py-1.5 rounded-lg text-[11px] text-[#8E95AF]">
+                          <span className="font-semibold text-[#5B82FF] mr-1">
+                            Replying to {msg.replyTo.senderName}:
+                          </span>
+                          <span className="truncate inline-block max-w-[200px] align-bottom">
+                            {msg.replyTo.text}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Main Message Bubble */}
+                      <div
+                        className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                          msg.isDeleted
+                            ? 'bg-[#181B2B] text-[#626A86] italic border border-[#23263A]'
+                            : msg.isSelf
+                            ? 'bg-[#4E75FF] text-white rounded-tr-none shadow-md'
+                            : 'bg-[#0B0D1A] text-white border border-[#23263A] rounded-tl-none'
+                        }`}
+                      >
+                        {!msg.isSelf && !msg.isDeleted && (
+                          <p className="font-bold text-[#5B82FF] mb-1 text-[11px]">
+                            {msg.senderName}
+                            {msg.senderRole && (
+                              <span className="text-[#8E95AF] font-normal ml-1 border-l border-[#23263A] pl-1">
+                                {msg.senderRole}
+                              </span>
+                            )}
+                          </p>
+                        )}
+
+                        <p className={msg.isDeleted ? 'italic' : ''}>{msg.text}</p>
+
+                        {/* File Attachments */}
+                        {msg.attachments.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {msg.attachments.map((att) => (
+                              <a
+                                key={att.id}
+                                href={att.fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-2 p-2 rounded-xl bg-black/20 hover:bg-black/40 border border-white/10 text-white transition-colors"
+                              >
+                                <FileText className="w-4 h-4 text-[#5B82FF] shrink-0" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[11px] font-semibold truncate">{att.fileName}</p>
+                                  <p className="text-[9px] text-white/70">
+                                    {(att.fileSize / 1024).toFixed(1)} KB
+                                  </p>
+                                </div>
+                              </a>
+                            ))}
+                          </div>
+                        )}
+
+                        <p
+                          className={`text-[10px] mt-1.5 text-right ${
+                            msg.isSelf ? 'text-white/70' : 'text-[#8E95AF]'
+                          }`}
+                        >
+                          {msg.time}
+                        </p>
+                      </div>
+
+                      {/* Reaction Badges */}
+                      {Object.keys(reactionGroups).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Object.entries(reactionGroups).map(([emoji, group]) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleReact(msg.id, emoji)}
+                              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
+                                group.hasReacted
+                                  ? 'bg-[#4E75FF]/20 border-[#5B82FF] text-white'
+                                  : 'bg-[#141726] border-[#23263A] text-[#8E95AF] hover:text-white'
+                              }`}
+                            >
+                              <span>{emoji}</span>
+                              <span className="font-bold">{group.count}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
-          {/* Input Form */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-[#23263A] bg-[#090B17]">
+          {/* Input Form & Composer */}
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-[#23263A] bg-[#090B17] space-y-2">
+            {/* Replying Preview Banner */}
+            {replyingMsg && (
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#1D2236] border border-[#5B82FF]/40 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <Reply className="w-3.5 h-3.5 text-[#5B82FF] shrink-0" />
+                  <span className="text-[#8E95AF]">Replying to</span>
+                  <span className="font-bold text-white truncate">{replyingMsg.senderName}</span>
+                  <span className="text-[#626A86] truncate">&quot;{replyingMsg.text}&quot;</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReplyingMsg(null)}
+                  className="text-[#8E95AF] hover:text-white shrink-0 ml-2"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Selected File Attachment Banner */}
+            {selectedFile && (
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#1D2236] border border-[#5B82FF]/40 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <Paperclip className="w-3.5 h-3.5 text-[#5B82FF] shrink-0" />
+                  <span className="font-semibold text-white truncate">{selectedFile.fileName}</span>
+                  <span className="text-[10px] text-[#8E95AF]">
+                    ({(selectedFile.fileSize / 1024).toFixed(1)} KB)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedFile(null)}
+                  className="text-[#8E95AF] hover:text-white shrink-0 ml-2"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
+              <label
+                htmlFor="chat-file-upload"
+                className="p-2.5 bg-[#141726] border border-[#23263A] text-[#8E95AF] hover:text-white rounded-xl cursor-pointer transition-colors shrink-0"
+                title="Attach file (max 10MB)"
+              >
+                <Paperclip className="w-4 h-4" />
+                <input
+                  id="chat-file-upload"
+                  type="file"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+
               <input
                 type="text"
                 value={inputText}
@@ -443,4 +702,3 @@ export default function MessagesPage() {
     </DashboardLayout>
   );
 }
-

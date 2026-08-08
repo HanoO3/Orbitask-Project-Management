@@ -13,6 +13,8 @@ import {
 import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { CheckSquare, Clock, CheckCircle2, FolderKanban, Users } from "lucide-react";
+import { AnalyticsSection } from "@/components/analytics/analytics-section";
+import { ActivityTimeline } from "@/components/activity/activity-timeline";
 
 
 type ProjectMember = {
@@ -499,6 +501,12 @@ export default function MemberDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* Analytics Dashboard */}
+      <AnalyticsSection />
+
+      {/* Activity Timeline */}
+      <ActivityTimeline />
     </div>
   );
 }

@@ -4,26 +4,39 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-export async function sendChatMessage(channel: string, content: string) {
+export async function sendChatMessage(
+  channel: string,
+  content: string,
+  replyToId?: string,
+  attachment?: { fileName: string; fileUrl: string; fileType: string; fileSize: number }
+) {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
   }
 
-  if (!content.trim()) {
-    return { success: false, error: "Message content cannot be empty" };
+  if (!content.trim() && !attachment) {
+    return { success: false, error: "Message or attachment is required" };
   }
 
   try {
-    if (!prisma.chatMessage) {
-      return { success: false, error: "Chat service initializing" };
-    }
-
     const message = await prisma.chatMessage.create({
       data: {
         content: content.trim(),
         channel,
         senderId: session.user.id,
+        replyToId: replyToId || null,
+        attachments: attachment
+          ? {
+              create: {
+                fileName: attachment.fileName,
+                fileUrl: attachment.fileUrl,
+                fileType: attachment.fileType,
+                fileSize: attachment.fileSize,
+                userId: session.user.id,
+              },
+            }
+          : undefined,
       },
       include: {
         sender: {
@@ -33,6 +46,12 @@ export async function sendChatMessage(channel: string, content: string) {
             email: true,
             role: true,
             avatar: true,
+          },
+        },
+        attachments: true,
+        replyTo: {
+          include: {
+            sender: { select: { id: true, name: true } },
           },
         },
       },
@@ -54,10 +73,6 @@ export async function getChannelMessages(channel: string) {
   }
 
   try {
-    if (!prisma.chatMessage) {
-      return [];
-    }
-
     const messages = await prisma.chatMessage.findMany({
       where: { channel },
       orderBy: { createdAt: "asc" },
@@ -71,6 +86,17 @@ export async function getChannelMessages(channel: string) {
             avatar: true,
           },
         },
+        reactions: {
+          include: {
+            user: { select: { id: true, name: true } },
+          },
+        },
+        attachments: true,
+        replyTo: {
+          include: {
+            sender: { select: { id: true, name: true } },
+          },
+        },
       },
       take: 100,
     });
@@ -79,5 +105,81 @@ export async function getChannelMessages(channel: string) {
   } catch (err) {
     console.error("getChannelMessages error:", err);
     return [];
+  }
+}
+
+export async function deleteChatMessage(messageId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const message = await prisma.chatMessage.findUnique({
+    where: { id: messageId },
+  });
+
+  if (!message) {
+    return { success: false, error: "Message not found" };
+  }
+
+  if (message.senderId !== session.user.id && session.user.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized: You can only delete your own messages" };
+  }
+
+  try {
+    await prisma.chatMessage.update({
+      where: { id: messageId },
+      data: {
+        isDeleted: true,
+        content: "This message was deleted.",
+      },
+    });
+
+    revalidatePath("/messages");
+    return { success: true };
+  } catch (err) {
+    console.error("deleteChatMessage error:", err);
+    return { success: false, error: "Failed to delete message" };
+  }
+}
+
+export async function toggleMessageReaction(messageId: string, emoji: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const userId = session.user.id;
+
+  try {
+    const existing = await prisma.messageReaction.findUnique({
+      where: {
+        messageId_userId_emoji: {
+          messageId,
+          userId,
+          emoji,
+        },
+      },
+    });
+
+    if (existing) {
+      await prisma.messageReaction.delete({
+        where: { id: existing.id },
+      });
+    } else {
+      await prisma.messageReaction.create({
+        data: {
+          messageId,
+          userId,
+          emoji,
+        },
+      });
+    }
+
+    revalidatePath("/messages");
+    return { success: true };
+  } catch (err) {
+    console.error("toggleMessageReaction error:", err);
+    return { success: false, error: "Failed to toggle reaction" };
   }
 }

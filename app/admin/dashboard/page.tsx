@@ -4,6 +4,8 @@ import Link from "next/link";
 import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { FolderKanban, Users } from "lucide-react";
+import { AnalyticsSection } from "@/components/analytics/analytics-section";
+import { ActivityTimeline } from "@/components/activity/activity-timeline";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -98,11 +100,17 @@ export default async function AdminDashboard() {
               Manage Users
             </h3>
             <p className="text-xs text-gray-400 mt-1">
-              Add new users, edit details, and assign system access roles.
+              Review pending signups, assign roles, approve or reject user accounts.
             </p>
           </div>
         </Link>
       </div>
+
+      {/* Analytics Dashboard */}
+      <AnalyticsSection />
+
+      {/* System Activity Timeline */}
+      <ActivityTimeline />
     </div>
   );
 }

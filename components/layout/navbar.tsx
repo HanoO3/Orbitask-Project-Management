@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { Plus, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationBell } from '@/components/notification-bell';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 interface NavbarProps {
   title?: string;
@@ -41,6 +42,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right side: Actions */}
         <div className="flex items-center gap-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* + New Task Button */}
           {onOpenNewTaskModal && (
             <button
@@ -109,15 +113,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         <h1 className="text-xl font-bold text-white tracking-tight">
           {title}
         </h1>
-        {onOpenNewTaskModal && (
-          <button
-            onClick={onOpenNewTaskModal}
-            className="flex items-center gap-1 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3 py-1.5 rounded-lg font-medium text-xs shadow-md transition-all active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Task</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {onOpenNewTaskModal && (
+            <button
+              onClick={onOpenNewTaskModal}
+              className="flex items-center gap-1 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3 py-1.5 rounded-lg font-medium text-xs shadow-md transition-all active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Task</span>
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

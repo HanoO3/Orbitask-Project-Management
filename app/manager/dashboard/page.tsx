@@ -7,6 +7,8 @@ import { getMyProjects, getMyProjectStats } from "@/lib/actions/manager-projects
 import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { Users, ClipboardList, CalendarDays } from "lucide-react";
+import { AnalyticsSection } from "@/components/analytics/analytics-section";
+import { ActivityTimeline } from "@/components/activity/activity-timeline";
 
 type Project = {
   id: string;
@@ -162,6 +164,12 @@ export default function ManagerDashboard() {
           </div>
         )}
       </div>
+
+      {/* Real Analytics Section */}
+      <AnalyticsSection />
+
+      {/* Activity Timeline */}
+      <ActivityTimeline />
     </div>
   );
 }

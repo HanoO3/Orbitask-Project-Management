@@ -32,6 +32,54 @@
   --text-muted: #626A86;
 }
 
+html.light {
+  --bg-main: #F4F6FB;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0F4FF;
+  --bg-input: #F8FAFC;
+  --border-color: #E2E8F0;
+  --border-subtle: #CBD5E1;
+  
+  --text-white: #0F172A;
+  --text-gray: #475569;
+  --text-muted: #64748B;
+}
+
+html.light body {
+  background-color: #F4F6FB !important;
+  color: #0F172A !important;
+}
+
+html.light div.bg-\[\#0B0D1A\],
+html.light div.bg-\[\#090B17\],
+html.light header.bg-\[\#0B0D1A\]\/90 {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light div.bg-\[\#141726\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+html.light .text-white {
+  color: #0F172A !important;
+}
+
+html.light .text-\[\#8E95AF\] {
+  color: #475569 !important;
+}
+
+html.light .text-\[\#626A86\] {
+  color: #64748B !important;
+}
+
+html.light .border-\[\#23263A\] {
+  border-color: #E2E8F0 !important;
+}
+
 @layer base {
   * {
     border-color: var(--border-color);
