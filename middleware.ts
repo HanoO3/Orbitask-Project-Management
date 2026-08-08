@@ -8,6 +8,7 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
+  const userApprovalStatus = (req.auth?.user as { approvalStatus?: string })?.approvalStatus;
 
   const isLoginPage = nextUrl.pathname === "/login";
   const isSignupPage = nextUrl.pathname === "/signup";
@@ -19,6 +20,12 @@ export default auth((req) => {
 
   if (!isLoggedIn && !isAuthPage) {
     return NextResponse.redirect(new URL("/login", nextUrl));
+  }
+
+  // If user session exists but approvalStatus is not APPROVED, block access
+  if (isLoggedIn && userApprovalStatus && userApprovalStatus !== "APPROVED") {
+    const errorType = userApprovalStatus === "REJECTED" ? "AccountRejected" : "PendingApproval";
+    return NextResponse.redirect(new URL(`/login?error=${errorType}`, nextUrl));
   }
 
   if (isLoggedIn && isAuthPage) {

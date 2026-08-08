@@ -2,14 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import { User, Mail, Lock, ArrowRight, ShieldCheck, AlertCircle, Loader2, Briefcase } from 'lucide-react';
 import { OrbitaskLogo } from '@/components/logo';
 import { registerUser } from '@/lib/actions/auth-register';
 
 export default function SignupPage() {
-  const router = useRouter();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +16,7 @@ export default function SignupPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [registeredSuccess, setRegisteredSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,34 +47,48 @@ export default function SignupPage() {
         role,
       });
 
+      setLoading(false);
+
       if (!res.success) {
-        setLoading(false);
         setError(res.error || 'Failed to create account.');
         return;
       }
 
-      // Auto sign-in after successful registration
-      const signInRes = await signIn('credentials', {
-        email: email.trim().toLowerCase(),
-        password,
-        redirect: false,
-      });
-
-      setLoading(false);
-
-      if (signInRes?.error) {
-        // Fallback to login page if auto sign-in has delay
-        router.push('/login');
-      } else {
-        router.push('/dashboard');
-        router.refresh();
-      }
+      setRegisteredSuccess(true);
     } catch (err: unknown) {
       setLoading(false);
       const message = err instanceof Error ? err.message : String(err);
       setError(message || 'An error occurred during registration.');
     }
   };
+
+  if (registeredSuccess) {
+    return (
+      <div className="min-h-screen bg-[#0B0D1A] flex items-center justify-center p-4 md:p-8 select-none">
+        <div className="w-full max-w-md bg-[#141726] border border-[#23263A] rounded-3xl shadow-2xl p-8 text-center space-y-6">
+          <div className="mb-2">
+            <OrbitaskLogo size="lg" />
+          </div>
+          <div className="w-16 h-16 rounded-2xl bg-[#4E75FF]/10 border border-[#5B82FF]/30 flex items-center justify-center mx-auto text-[#5B82FF]">
+            <ShieldCheck className="w-8 h-8 text-[#5B82FF]" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">Account Created Successfully</h2>
+            <p className="text-xs text-[#8E95AF] leading-relaxed">
+              Your account is currently pending administrator approval. You will be able to log in once an administrator approves your account.
+            </p>
+          </div>
+          <Link
+            href="/login"
+            className="w-full inline-flex items-center justify-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-3 rounded-xl font-semibold text-xs shadow-lg transition-all"
+          >
+            <span>Back to Login</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0D1A] flex items-center justify-center p-4 md:p-8 select-none">

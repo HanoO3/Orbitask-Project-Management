@@ -38,6 +38,7 @@ export async function registerUser(data: {
       email,
       password: hashedPassword,
       role,
+      approvalStatus: "PENDING",
       avatar: "🚀",
     },
   });

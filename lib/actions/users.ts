@@ -22,6 +22,7 @@ export async function getUsers() {
       name: true,
       email: true,
       role: true,
+      approvalStatus: true,
       createdAt: true,
     },
   });
@@ -34,6 +35,7 @@ export async function getWorkspaceUsers() {
   }
 
   return prisma.user.findMany({
+    where: { approvalStatus: "APPROVED" },
     orderBy: { name: "asc" },
     select: {
       id: true,
@@ -69,6 +71,7 @@ export async function createUser(data: {
       email: data.email,
       password: hashedPassword,
       role: data.role,
+      approvalStatus: "APPROVED",
     },
   });
 
@@ -107,6 +110,34 @@ export async function updateUser(
       role: data.role,
       ...(data.password ? { password: await bcrypt.hash(data.password, 10) } : {}),
     },
+  });
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+export async function approveUser(id: string) {
+  await requireAdmin();
+
+  await prisma.user.update({
+    where: { id },
+    data: { approvalStatus: "APPROVED" },
+  });
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+export async function rejectUser(id: string) {
+  const session = await requireAdmin();
+
+  if (session.user.id === id) {
+    return { success: false, error: "You cannot reject your own admin account" };
+  }
+
+  await prisma.user.update({
+    where: { id },
+    data: { approvalStatus: "REJECTED" },
   });
 
   revalidatePath("/admin/users");

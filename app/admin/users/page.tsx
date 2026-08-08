@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { getUsers, deleteUser } from "@/lib/actions/users";
+import { getUsers, deleteUser, approveUser, rejectUser } from "@/lib/actions/users";
 import { UserModal } from "@/components/user-modal";
 
 type User = {
@@ -9,6 +9,7 @@ type User = {
   name: string;
   email: string;
   role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER";
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
 };
 
@@ -16,6 +17,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,10 +34,28 @@ export default function UsersPage() {
     return () => clearTimeout(t);
   }, [loadUsers]);
 
-
   const handleModalClose = () => {
     setModalOpen(false);
     setEditingUser(null);
+    loadUsers();
+  };
+
+  const handleApprove = async (id: string) => {
+    const result = await approveUser(id);
+    if (!result.success) {
+      alert("Failed to approve user");
+      return;
+    }
+    loadUsers();
+  };
+
+  const handleReject = async (id: string) => {
+    if (!confirm("Are you sure you want to reject this user account?")) return;
+    const result = await rejectUser(id);
+    if (!result.success) {
+      alert(result.error || "Failed to reject user");
+      return;
+    }
     loadUsers();
   };
 
@@ -54,7 +74,8 @@ export default function UsersPage() {
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase());
     const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = statusFilter === "ALL" || u.approvalStatus === statusFilter;
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   const roleBadge = (role: string) => {
@@ -66,12 +87,21 @@ export default function UsersPage() {
     return styles[role] || "bg-gray-500/15 text-gray-300 border-gray-500/30";
   };
 
+  const statusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      APPROVED: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      PENDING: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+      REJECTED: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+    };
+    return styles[status] || "bg-gray-500/15 text-gray-300 border-gray-500/30";
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white">User Management</h1>
-          <p className="text-gray-400 text-xs mt-1">Manage system user accounts and roles</p>
+          <p className="text-gray-400 text-xs mt-1">Manage system user accounts, roles, and approval status</p>
         </div>
         <button
           onClick={() => {
@@ -102,6 +132,17 @@ export default function UsersPage() {
           <option value="PROJECT_MANAGER">Project Manager</option>
           <option value="TEAM_MEMBER">Team Member</option>
         </select>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-[#131725] border border-[#22293F] text-white px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-blue-500"
+        >
+          <option value="ALL">All Statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+        </select>
       </div>
 
       <div className="bg-[#131725] border border-[#22293F] rounded-2xl overflow-hidden shadow-2xl">
@@ -111,46 +152,76 @@ export default function UsersPage() {
           <p className="p-8 text-center text-gray-500 text-xs">No users found</p>
         ) : (
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left border-collapse min-w-[550px]">
-            <thead className="bg-[#0B0E17] text-gray-400 text-xs uppercase tracking-wider border-b border-[#22293F]">
-              <tr>
-                <th className="px-6 py-3.5">Name</th>
-                <th className="px-6 py-3.5">Email</th>
-                <th className="px-6 py-3.5">Role</th>
-                <th className="px-6 py-3.5">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1E253B] text-xs">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-[#0B0E17]/50 transition">
-                  <td className="px-6 py-4 font-semibold text-white">{user.name}</td>
-                  <td className="px-6 py-4 text-gray-400">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${roleBadge(user.role)}`}>
-                      {user.role.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 space-x-3">
-                    <button
-                      onClick={() => {
-                        setEditingUser(user);
-                        setModalOpen(true);
-                      }}
-                      className="text-blue-400 hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-400 hover:underline"
-                    >
-                      Delete
-                    </button>
-                  </td>
+            <table className="w-full text-left border-collapse min-w-[650px]">
+              <thead className="bg-[#0B0E17] text-gray-400 text-xs uppercase tracking-wider border-b border-[#22293F]">
+                <tr>
+                  <th className="px-6 py-3.5">Name</th>
+                  <th className="px-6 py-3.5">Email</th>
+                  <th className="px-6 py-3.5">Role</th>
+                  <th className="px-6 py-3.5">Status</th>
+                  <th className="px-6 py-3.5">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#1E253B] text-xs">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-[#0B0E17]/50 transition">
+                    <td className="px-6 py-4 font-semibold text-white">{user.name}</td>
+                    <td className="px-6 py-4 text-gray-400">{user.email}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${roleBadge(user.role)}`}>
+                        {user.role.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${statusBadge(user.approvalStatus || 'APPROVED')}`}>
+                        {user.approvalStatus || 'APPROVED'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 space-x-2">
+                      {user.approvalStatus === "PENDING" && (
+                        <>
+                          <button
+                            onClick={() => handleApprove(user.id)}
+                            className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/40 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(user.id)}
+                            className="bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 border border-rose-500/40 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {user.approvalStatus === "REJECTED" && (
+                        <button
+                          onClick={() => handleApprove(user.id)}
+                          className="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/40 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition"
+                        >
+                          Approve
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setEditingUser(user);
+                          setModalOpen(true);
+                        }}
+                        className="text-blue-400 hover:underline px-1"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-400 hover:underline px-1"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

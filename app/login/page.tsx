@@ -2,20 +2,30 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Lock, Mail, ArrowRight, CheckCircle2, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { OrbitaskLogo } from '@/components/logo';
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get('error');
+
+  const initialError =
+    urlError === 'PendingApproval'
+      ? 'Your account is pending administrator approval.'
+      : urlError === 'AccountRejected'
+      ? 'Your account has not been approved by the administrator.'
+      : null;
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
-  
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +42,13 @@ export default function LoginPage() {
       setLoading(false);
 
       if (res?.error) {
-        setError('Invalid email address or password.');
+        if (res.error.includes('PendingApproval') || res.error.includes('Pending')) {
+          setError('Your account is pending administrator approval.');
+        } else if (res.error.includes('AccountRejected') || res.error.includes('Rejected')) {
+          setError('Your account has not been approved by the administrator.');
+        } else {
+          setError('Invalid email address or password.');
+        }
       } else {
         // Successful login, refresh router and navigate to dashboard
         router.push('/dashboard');
@@ -41,7 +57,13 @@ export default function LoginPage() {
     } catch (err: unknown) {
       setLoading(false);
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || 'An error occurred while signing in. Please try again.');
+      if (message.includes('PendingApproval')) {
+        setError('Your account is pending administrator approval.');
+      } else if (message.includes('AccountRejected')) {
+        setError('Your account has not been approved by the administrator.');
+      } else {
+        setError('An error occurred while signing in. Please try again.');
+      }
     }
   };
 
@@ -211,5 +233,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-[#0B0D1A] flex items-center justify-center text-white text-xs">Loading...</div>}>
+      <LoginFormContent />
+    </React.Suspense>
   );
 }

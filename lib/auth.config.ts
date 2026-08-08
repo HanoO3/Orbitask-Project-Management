@@ -11,6 +11,7 @@ export default {
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role;
+        token.approvalStatus = (user as { approvalStatus?: string }).approvalStatus;
       }
       return token;
     },
@@ -18,6 +19,7 @@ export default {
       if (session.user) {
         (session.user as { id?: string }).id = token.id as string;
         (session.user as { role?: string }).role = token.role as string;
+        (session.user as { approvalStatus?: string }).approvalStatus = token.approvalStatus as string;
       }
       return session;
     },

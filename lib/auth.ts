@@ -21,7 +21,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: (credentials.email as string).trim().toLowerCase() },
         });
 
         if (!user) {
@@ -37,11 +37,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        if (user.approvalStatus === "PENDING") {
+          throw new Error("PendingApproval");
+        }
+
+        if (user.approvalStatus === "REJECTED") {
+          throw new Error("AccountRejected");
+        }
+
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
+          approvalStatus: user.approvalStatus,
         };
       },
     }),

@@ -13,6 +13,12 @@ enum Role {
   TEAM_MEMBER
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum ProjectStatus {
   NOT_STARTED
   IN_PROGRESS
@@ -50,14 +56,15 @@ enum NotificationType {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(TEAM_MEMBER)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  password       String
+  role           Role           @default(TEAM_MEMBER)
+  approvalStatus ApprovalStatus @default(PENDING)
+  avatar         String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   managedProjects    Project[]       @relation("ProjectManager")
   projectMemberships ProjectMember[]
