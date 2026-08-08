@@ -63,7 +63,16 @@ export async function getUserProjects() {
     }
   });
 
-  return projects.map((p) => {
+  // Deduplicate by project ID / name to prevent duplicate rendering
+  const uniqueMap = new Map<string, (typeof projects)[number]>();
+  for (const p of projects) {
+    if (!uniqueMap.has(p.name)) {
+      uniqueMap.set(p.name, p);
+    }
+  }
+  const uniqueProjects = Array.from(uniqueMap.values());
+
+  return uniqueProjects.map((p) => {
     const totalTasks = p.tasks.length;
     const completedTasks = p.tasks.filter((t) => t.status === "COMPLETED").length;
     const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;

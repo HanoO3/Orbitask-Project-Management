@@ -7,6 +7,7 @@ import {
   Hash,
   MessageSquare,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserProjects } from '@/lib/actions/projects';
@@ -27,7 +28,7 @@ type WorkspaceProject = {
   description?: string;
 };
 
-interface ChatMessage {
+type ChatMessage = {
   id: string;
   senderName: string;
   senderInitials: string;
@@ -36,7 +37,7 @@ interface ChatMessage {
   text: string;
   time: string;
   isSelf: boolean;
-}
+};
 
 function getInitials(name: string) {
   if (!name) return 'U';
@@ -78,6 +79,7 @@ export default function MessagesPage() {
 
   const [projects, setProjects] = useState<WorkspaceProject[]>([]);
   const [users, setUsers] = useState<WorkspaceUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [activeChannel, setActiveChannel] = useState<{ id: string; name: string; type: 'channel' | 'dm' }>({
     id: 'general',
@@ -111,12 +113,15 @@ export default function MessagesPage() {
         getWorkspaceUsers(),
       ]);
 
-      const formattedProjects = (projectsData as Array<{ id: string; name: string }>).map((p) => ({
-        id: p.id,
-        name: p.name.toLowerCase().replace(/\s+/g, '-'),
-      }));
+      const uniqueMap = new Map<string, WorkspaceProject>();
+      (projectsData as Array<{ id: string; name: string }>).forEach((p) => {
+        const slug = p.name.toLowerCase().replace(/\s+/g, '-');
+        if (!uniqueMap.has(slug)) {
+          uniqueMap.set(slug, { id: p.id, name: slug });
+        }
+      });
 
-      setProjects(formattedProjects);
+      setProjects(Array.from(uniqueMap.values()));
       setUsers(usersData as WorkspaceUser[]);
     } catch (err) {
       console.error('Failed to load workspace channels:', err);
@@ -203,12 +208,35 @@ export default function MessagesPage() {
     }
   };
 
+  const filteredProjects = projects.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  );
+
+  const showGeneral =
+    searchQuery === '' || 'general'.includes(searchQuery.toLowerCase().trim());
+
+  const filteredUsers = users
+    .filter((u) => u.id !== session?.user?.id)
+    .filter((u) => u.name.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+
   return (
     <DashboardLayout title="Messages">
       <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[520px] grid grid-cols-1 md:grid-cols-4">
         {/* Left Channels & DM List */}
         <div className={`md:col-span-1 border-r border-[#23263A] bg-[#090B17] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           <div>
+            {/* Messages Search Bar */}
+            <div className="relative mb-4">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search messages..."
+                className="w-full bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF] transition-all"
+              />
+            </div>
+
             <h3 className="font-bold text-white text-xs uppercase tracking-wider mb-3 text-[#8E95AF]">
               Workspace Channels
             </h3>
@@ -220,22 +248,24 @@ export default function MessagesPage() {
               </div>
             ) : (
               <div className="space-y-1 mb-6">
-                <button
-                  onClick={() => {
-                    setActiveChannel({ id: 'general', name: 'general', type: 'channel' });
-                    setMobileChatView(true);
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                    activeChannel.name === 'general' && activeChannel.type === 'channel'
-                      ? 'bg-[#4E75FF] text-white shadow-md'
-                      : 'text-[#8E95AF] hover:text-white hover:bg-[#141726]'
-                  }`}
-                >
-                  <Hash className="w-4 h-4" />
-                  <span>general</span>
-                </button>
+                {showGeneral && (
+                  <button
+                    onClick={() => {
+                      setActiveChannel({ id: 'general', name: 'general', type: 'channel' });
+                      setMobileChatView(true);
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      activeChannel.name === 'general' && activeChannel.type === 'channel'
+                        ? 'bg-[#4E75FF] text-white shadow-md'
+                        : 'text-[#8E95AF] hover:text-white hover:bg-[#141726]'
+                    }`}
+                  >
+                    <Hash className="w-4 h-4" />
+                    <span>general</span>
+                  </button>
+                )}
 
-                {projects.map((proj) => (
+                {filteredProjects.map((proj) => (
                   <button
                     key={proj.id}
                     onClick={() => {
@@ -263,40 +293,38 @@ export default function MessagesPage() {
               <div className="py-4 text-center text-xs text-[#8E95AF]">Loading members...</div>
             ) : (
               <div className="space-y-1.5 max-h-56 overflow-y-auto">
-                {users
-                  .filter((u) => u.id !== session?.user?.id)
-                  .map((member, idx) => {
-                    const initials = getInitials(member.name);
-                    const colorBg = colorPalette[idx % colorPalette.length];
-                    const isSelected = activeChannel.id === member.id && activeChannel.type === 'dm';
+                {filteredUsers.map((member, idx) => {
+                  const initials = getInitials(member.name);
+                  const colorBg = colorPalette[idx % colorPalette.length];
+                  const isSelected = activeChannel.id === member.id && activeChannel.type === 'dm';
 
-                    return (
+                  return (
+                    <div
+                      key={member.id}
+                      onClick={() => {
+                        setActiveChannel({
+                          id: member.id,
+                          name: member.name,
+                          type: 'dm',
+                        });
+                        setMobileChatView(true);
+                      }}
+                      className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
+                        isSelected ? 'bg-[#1D2236] border border-[#5B82FF]/40' : 'hover:bg-[#141726]'
+                      }`}
+                    >
                       <div
-                        key={member.id}
-                        onClick={() => {
-                          setActiveChannel({
-                            id: member.id,
-                            name: member.name,
-                            type: 'dm',
-                          });
-                          setMobileChatView(true);
-                        }}
-                        className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
-                          isSelected ? 'bg-[#1D2236] border border-[#5B82FF]/40' : 'hover:bg-[#141726]'
-                        }`}
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 uppercase ${colorBg}`}
                       >
-                        <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 uppercase ${colorBg}`}
-                        >
-                          {initials}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-white truncate">{member.name}</p>
-                          <p className="text-[10px] text-[#8E95AF] truncate">{formatRole(member.role)}</p>
-                        </div>
+                        {initials}
                       </div>
-                    );
-                  })}
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-white truncate">{member.name}</p>
+                        <p className="text-[10px] text-[#8E95AF] truncate">{formatRole(member.role)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
