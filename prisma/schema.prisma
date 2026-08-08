@@ -66,18 +66,31 @@ model User {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  managedProjects    Project[]           @relation("ProjectManager")
-  projectMemberships ProjectMember[]
-  assignedTasks      Task[]              @relation("TaskAssignee")
-  createdTasks       Task[]              @relation("TaskCreator")
-  taskComments       TaskComment[]
-  notifications      Notification[]
-  chatMessages       ChatMessage[]       @relation("ChatSender")
-  activities         Activity[]
-  reactions          MessageReaction[]
-  attachments        MessageAttachment[]
+  managedProjects     Project[]            @relation("ProjectManager")
+  projectMemberships  ProjectMember[]
+  assignedTasks       Task[]               @relation("TaskAssignee")
+  createdTasks        Task[]               @relation("TaskCreator")
+  taskComments        TaskComment[]
+  notifications       Notification[]
+  chatMessages        ChatMessage[]        @relation("ChatSender")
+  activities          Activity[]
+  reactions           MessageReaction[]
+  attachments         MessageAttachment[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
 
 model Project {

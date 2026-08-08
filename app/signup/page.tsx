@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { User, Mail, Lock, ArrowRight, ShieldCheck, AlertCircle, Loader2, Briefcase } from 'lucide-react';
+import { User, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2, Briefcase } from 'lucide-react';
 import { OrbitaskLogo } from '@/components/logo';
+import { PasswordInput } from '@/components/password-input';
 import { registerUser } from '@/lib/actions/auth-register';
 
 export default function SignupPage() {
@@ -177,39 +178,23 @@ export default function SignupPage() {
 
               {/* Password & Confirm Password in 2 cols */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-10 pr-3 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] transition-all"
-                    />
-                  </div>
-                </div>
+                <PasswordInput
+                  id="signup-password"
+                  label="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                    <input
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-10 pr-3 py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] transition-all"
-                    />
-                  </div>
-                </div>
+                <PasswordInput
+                  id="signup-confirm-password"
+                  label="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
               </div>
 
               {/* Terms Checkbox */}

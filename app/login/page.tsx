@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Lock, Mail, ArrowRight, CheckCircle2, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, ArrowRight, CheckCircle2, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { OrbitaskLogo } from '@/components/logo';
+import { PasswordInput } from '@/components/password-input';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -116,23 +117,15 @@ function LoginFormContent() {
                 </div>
               </div>
 
-              {/* Password */}
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-11 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all"
-                  />
-                </div>
-              </div>
+              {/* Password using reusable PasswordInput */}
+              <PasswordInput
+                id="login-password"
+                label="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
 
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between text-xs pt-1">
@@ -146,9 +139,9 @@ function LoginFormContent() {
                   <span>Remember me</span>
                 </label>
 
-                <a href="#" className="text-[#5B82FF] hover:underline font-medium">
+                <Link href="/forgot-password" className="text-[#5B82FF] hover:underline font-medium">
                   Forgot password?
-                </a>
+                </Link>
               </div>
 
               {/* Login Button */}

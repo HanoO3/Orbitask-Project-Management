@@ -12,7 +12,9 @@ export default auth((req) => {
 
   const isLoginPage = nextUrl.pathname === "/login";
   const isSignupPage = nextUrl.pathname === "/signup";
-  const isAuthPage = isLoginPage || isSignupPage;
+  const isForgotPasswordPage = nextUrl.pathname === "/forgot-password";
+  const isResetPasswordPage = nextUrl.pathname === "/reset-password";
+  const isAuthPage = isLoginPage || isSignupPage || isForgotPasswordPage || isResetPasswordPage;
 
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isManagerRoute = nextUrl.pathname.startsWith("/manager");
