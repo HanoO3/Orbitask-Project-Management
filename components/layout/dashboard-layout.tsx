@@ -25,7 +25,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-w-0 flex-1 min-h-screen bg-[#0B0D1A] text-white">
+    <div className="flex flex-col min-w-0 flex-1 min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors">
       {/* Top Navbar Header */}
       <Navbar
         title={title}

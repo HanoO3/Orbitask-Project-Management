@@ -25,25 +25,25 @@ export const MyTasksCard: React.FC<MyTasksProps> = ({ tasks: initialTasks, onTog
     switch (priority) {
       case 'Urgent':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30">
             Urgent
           </span>
         );
       case 'High':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
             High
           </span>
         );
       case 'Medium':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
             Medium
           </span>
         );
       case 'Low':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-700/50 text-slate-300 border border-slate-600/40">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-600/40">
             Low
           </span>
         );
@@ -51,27 +51,27 @@ export const MyTasksCard: React.FC<MyTasksProps> = ({ tasks: initialTasks, onTog
   };
 
   return (
-    <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-5 shadow-lg">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-xs transition-colors">
       {/* Card Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-base md:text-lg font-bold text-white tracking-tight">
+          <h3 className="text-base md:text-lg font-bold text-[var(--text-primary)] tracking-tight">
             My Tasks
           </h3>
-          <p className="text-xs text-[#8E95AF] mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             Tasks assigned to you
           </p>
         </div>
         <Link
           href="/tasks"
-          className="text-xs font-semibold text-white bg-[#1E2338] hover:bg-[#2A304D] border border-[#2B314F] px-3.5 py-1.5 rounded-full transition-all"
+          className="text-xs font-semibold text-[var(--text-primary)] bg-[var(--bg-card-hover)] hover:bg-[#4E75FF] hover:text-white border border-[var(--border-color)] px-3.5 py-1.5 rounded-full transition-all"
         >
           View all
         </Link>
       </div>
 
       {/* Task Items List */}
-      <div className="divide-y divide-[#23263A]/70">
+      <div className="divide-y divide-[var(--border-color)]">
         {taskList.map((task, idx) => (
           <motion.div
             key={task.id}
@@ -84,10 +84,10 @@ export const MyTasksCard: React.FC<MyTasksProps> = ({ tasks: initialTasks, onTog
             <div className="flex items-center gap-3.5 min-w-0">
               <button
                 onClick={() => handleToggle(task.id)}
-                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
+                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                   task.completed
                     ? 'bg-[#4E75FF] border-[#4E75FF] text-white'
-                    : 'border-[#333754] hover:border-[#5B82FF] bg-[#121524]'
+                    : 'border-[var(--border-color)] hover:border-[#5B82FF] bg-[var(--bg-input)]'
                 }`}
                 aria-label={`Mark task ${task.title} complete`}
               >
@@ -98,13 +98,13 @@ export const MyTasksCard: React.FC<MyTasksProps> = ({ tasks: initialTasks, onTog
                 <p
                   className={`text-sm font-semibold transition-all truncate ${
                     task.completed
-                      ? 'line-through text-[#626A86]'
-                      : 'text-white group-hover:text-[#5B82FF]'
+                      ? 'line-through text-[var(--text-muted)]'
+                      : 'text-[var(--text-primary)] group-hover:text-[#5B82FF]'
                   }`}
                 >
                   {task.title}
                 </p>
-                <p className="text-[11px] text-[#8E95AF] truncate mt-0.5">
+                <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
                   {task.projectName}
                 </p>
               </div>
@@ -112,8 +112,8 @@ export const MyTasksCard: React.FC<MyTasksProps> = ({ tasks: initialTasks, onTog
 
             {/* Due Date & Priority Badge */}
             <div className="flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-1 text-[11px] text-[#8E95AF]">
-                <Clock className="w-3.5 h-3.5 text-[#626A86]" />
+              <div className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)]">
+                <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                 <span>{task.dueDate}</span>
               </div>
               {getPriorityBadge(task.priority)}

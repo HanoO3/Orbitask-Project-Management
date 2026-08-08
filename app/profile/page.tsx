@@ -4,6 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { getProfile, updateProfile } from '@/lib/actions/profile';
 import { useSession } from 'next-auth/react';
 import { Save } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationBell } from '@/components/notification-bell';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 type ProfileData = {
   id: string;
@@ -96,105 +100,115 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-[#0B0D1A] p-8 text-center text-[#8E95AF]">Loading profile...</div>;
+    return <div className="min-h-screen bg-[var(--bg-main)] p-8 text-center text-[var(--text-secondary)]">Loading profile...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D1A] text-white p-4 md:p-8 space-y-6">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] p-4 md:p-8 space-y-6 transition-colors">
       <div className="max-w-3xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <Link href="/dashboard" className="flex items-center gap-2 text-xs font-semibold text-[#5B82FF] hover:underline">
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <NotificationBell />
+          </div>
+        </div>
+
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Profile Settings</h1>
-          <p className="text-xs text-[#8E95AF] mt-1">Manage your account information and password.</p>
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Profile Settings</h1>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">Manage your account information and password.</p>
         </div>
 
         {message && (
           <div
             className={`p-4 rounded-xl text-xs font-semibold ${
               message.type === 'success'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30'
+                : 'bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/30'
             }`}
           >
             {message.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-xl space-y-6">
-          <div className="flex items-center gap-4 pb-6 border-b border-[#23263A]">
-            <div className="w-16 h-16 rounded-full bg-[#4E75FF] text-white flex items-center justify-center font-extrabold text-xl shadow-lg border border-[#5B82FF]/40">
+        <form onSubmit={handleSubmit} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-xs space-y-6 transition-colors">
+          <div className="flex items-center gap-4 pb-6 border-b border-[var(--border-color)]">
+            <div className="w-16 h-16 rounded-full bg-[#4E75FF] text-white flex items-center justify-center font-extrabold text-xl shadow-lg border border-[#5B82FF]/40 uppercase">
               {name ? name.slice(0, 2).toUpperCase() : 'JD'}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">{name}</h2>
-              <p className="text-xs text-[#8E95AF]">{profile?.role.replace('_', ' ')} · Member since {mounted ? formatDate(profile?.createdAt || '') : ''}</p>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">{name}</h2>
+              <p className="text-xs text-[var(--text-secondary)]">{profile?.role.replace('_', ' ')} · Member since {mounted ? formatDate(profile?.createdAt || '') : ''}</p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Full Name</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Full Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Email Address</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               />
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[#23263A] space-y-4">
-            <h3 className="text-sm font-bold text-white">Change Password</h3>
+          <div className="pt-6 border-t border-[var(--border-color)] space-y-4">
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Change Password</h3>
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Current Password</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Current Password</label>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">New Password</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">New Password</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Confirm New Password</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Confirm New Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                  className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                 />
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#23263A] flex justify-end">
+          <div className="pt-4 border-t border-[var(--border-color)] flex justify-end">
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50"
+              className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Saving...' : 'Save Changes'}</span>

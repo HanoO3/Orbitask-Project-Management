@@ -12,6 +12,7 @@ import {
 } from '@/lib/actions/manager-projects';
 import { TaskModal } from '@/components/task-modal';
 import { NotificationBell } from '@/components/notification-bell';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Calendar, User, ArrowLeft, Plus, Clock, User2 } from 'lucide-react';
 
 type Member = { id: string; name: string; email: string };
@@ -44,22 +45,22 @@ type ProjectDetail = {
 
 const priorityBadge = (p: string) => {
   const styles: Record<string, string> = {
-    LOW: 'bg-slate-700/50 text-slate-300 border border-slate-600/40',
-    MEDIUM: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    HIGH: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-    URGENT: 'bg-rose-500/20 text-rose-400 border border-rose-500/30',
+    LOW: 'bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-600/40',
+    MEDIUM: 'bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30',
+    HIGH: 'bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30',
+    URGENT: 'bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30',
   };
-  return styles[p] || 'bg-slate-700/50 text-slate-300';
+  return styles[p] || 'bg-slate-100 text-slate-700';
 };
 
 const taskStatusBadge = (s: string) => {
   const styles: Record<string, string> = {
-    TODO: 'bg-slate-700/50 text-slate-300 border border-slate-600/40',
-    IN_PROGRESS: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    REVIEW: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
-    COMPLETED: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    TODO: 'bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-600/40',
+    IN_PROGRESS: 'bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30',
+    REVIEW: 'bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30',
+    COMPLETED: 'bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30',
   };
-  return styles[s] || 'bg-slate-700/50 text-slate-300';
+  return styles[s] || 'bg-slate-100 text-slate-700';
 };
 
 const STATUS_COLUMNS: { key: Task['status']; label: string }[] = [
@@ -132,7 +133,7 @@ export default function ManagerProjectDetail({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0D1A] p-8 text-center text-[#8E95AF]">
+      <div className="min-h-screen bg-[var(--bg-main)] p-8 text-center text-[var(--text-secondary)]">
         Loading project details...
       </div>
     );
@@ -140,14 +141,14 @@ export default function ManagerProjectDetail({
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-[#0B0D1A] p-8 text-center text-[#8E95AF]">
+      <div className="min-h-screen bg-[var(--bg-main)] p-8 text-center text-[var(--text-secondary)]">
         Project not found.
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D1A] text-white p-4 md:p-8 space-y-6">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] p-4 md:p-8 space-y-6 transition-colors">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Top bar link */}
         <div className="flex justify-between items-center">
@@ -157,22 +158,23 @@ export default function ManagerProjectDetail({
           >
             <ArrowLeft className="w-4 h-4" /> Back to Projects
           </Link>
-          <div className="hidden lg:block">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             <NotificationBell />
           </div>
         </div>
 
         {/* Project Header Info */}
-        <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-start justify-between gap-4">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-extrabold text-white tracking-tight">{project.name}</h1>
+              <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">{project.name}</h1>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${priorityBadge(project.priority)}`}>
                 {project.priority}
               </span>
             </div>
-            <p className="text-sm text-[#8E95AF] leading-relaxed max-w-3xl">{project.description}</p>
-            <div className="flex items-center gap-2 text-xs text-[#626A86] pt-1">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-3xl">{project.description}</p>
+            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] pt-1">
               <Calendar className="w-4 h-4 text-[#5B82FF]" />
               <span>
                 {new Date(project.startDate).toLocaleDateString()} – {new Date(project.endDate).toLocaleDateString()}
@@ -185,30 +187,30 @@ export default function ManagerProjectDetail({
               setEditingTask(null);
               setTaskModalOpen(true);
             }}
-            className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-lg shadow-[#4E75FF]/30 transition-all shrink-0 active:scale-95"
+            className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-4 py-2.5 rounded-xl font-semibold text-xs shadow-md transition-all shrink-0 active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> + New Task
           </button>
         </div>
 
         {/* Members Management Card */}
-        <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-xl space-y-4">
-          <h2 className="text-base font-bold text-white tracking-tight">Team Members</h2>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-xs space-y-4 transition-colors">
+          <h2 className="text-base font-bold text-[var(--text-primary)] tracking-tight">Team Members</h2>
 
           {project.members.length === 0 ? (
-            <p className="text-xs text-[#8E95AF]">No members added yet.</p>
+            <p className="text-xs text-[var(--text-secondary)]">No members added yet.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {project.members.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-center gap-2 bg-[#0B0D1A] border border-[#23263A] rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-white shadow-sm"
+                  className="flex items-center gap-2 bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded-full pl-3 pr-1.5 py-1 text-xs font-medium text-[var(--text-primary)] shadow-xs"
                 >
                   <User className="w-3.5 h-3.5 text-[#5B82FF]" />
                   <span>{m.user.name}</span>
                   <button
                     onClick={() => handleRemoveMember(m.user.id)}
-                    className="text-[#8E95AF] hover:text-rose-400 w-4 h-4 flex items-center justify-center rounded-full hover:bg-rose-500/10 transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 w-4 h-4 flex items-center justify-center rounded-full hover:bg-rose-500/10 transition-colors cursor-pointer"
                     title="Remove member"
                   >
                     ×
@@ -222,7 +224,7 @@ export default function ManagerProjectDetail({
             <select
               value={selectedNewMember}
               onChange={(e) => setSelectedNewMember(e.target.value)}
-              className="flex-1 max-w-sm bg-[#0B0D1A] border border-[#23263A] text-white text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[#5B82FF]"
+              className="flex-1 max-w-sm bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[#5B82FF]"
             >
               <option value="">
                 {availableMembers.length === 0 ? 'No available team members' : 'Select a team member...'}
@@ -236,7 +238,7 @@ export default function ManagerProjectDetail({
             <button
               onClick={handleAddMember}
               disabled={!selectedNewMember || addingMember}
-              className="px-4 py-2.5 rounded-xl border border-[#4E75FF] text-[#5B82FF] hover:bg-[#4E75FF]/10 text-xs font-semibold transition-all disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl border border-[#4E75FF] text-[#5B82FF] hover:bg-[#4E75FF]/10 text-xs font-semibold transition-all disabled:opacity-40 cursor-pointer"
             >
               {addingMember ? 'Adding...' : 'Add Member'}
             </button>
@@ -245,10 +247,10 @@ export default function ManagerProjectDetail({
 
         {/* Tasks Kanban Board */}
         <div className="space-y-4">
-          <h2 className="text-base font-bold text-white tracking-tight">Tasks Board</h2>
+          <h2 className="text-base font-bold text-[var(--text-primary)] tracking-tight">Tasks Board</h2>
 
           {project.tasks.length === 0 ? (
-            <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-8 text-center text-xs text-[#8E95AF]">
+            <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-8 text-center text-xs text-[var(--text-secondary)]">
               No tasks yet. Click &quot;+ New Task&quot; above to create one.
             </div>
           ) : (
@@ -256,10 +258,10 @@ export default function ManagerProjectDetail({
               {STATUS_COLUMNS.map((col) => {
                 const colTasks = project.tasks.filter((t) => t.status === col.key);
                 return (
-                  <div key={col.key} className="bg-[#141726]/80 border border-[#23263A] rounded-2xl p-4 flex flex-col justify-between">
+                  <div key={col.key} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 flex flex-col justify-between transition-colors">
                     <div className="flex items-center justify-between mb-3 px-1">
-                      <h3 className="text-xs font-bold text-[#8E95AF] uppercase tracking-wider">{col.label}</h3>
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#0B0D1A] text-white border border-[#23263A]">
+                      <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">{col.label}</h3>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--bg-sidebar)] text-[var(--text-primary)] border border-[var(--border-color)]">
                         {colTasks.length}
                       </span>
                     </div>
@@ -268,12 +270,12 @@ export default function ManagerProjectDetail({
                       {colTasks.map((task) => (
                         <div
                           key={task.id}
-                          className="bg-[#0B0D1A] border border-[#23263A] hover:border-[#333754] rounded-xl p-4 shadow-sm transition-all group"
+                          className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] hover:border-[#5B82FF] rounded-xl p-4 shadow-xs transition-all group"
                         >
                           <div className="flex items-start justify-between gap-2 mb-1.5">
                             <Link
                               href={`/tasks/${task.id}`}
-                              className="font-bold text-white text-xs group-hover:text-[#5B82FF] transition-colors leading-snug"
+                              className="font-bold text-[var(--text-primary)] text-xs group-hover:text-[#5B82FF] transition-colors leading-snug"
                             >
                               {task.title}
                             </Link>
@@ -282,9 +284,9 @@ export default function ManagerProjectDetail({
                             </span>
                           </div>
 
-                          <p className="text-[#8E95AF] text-[11px] mb-3 line-clamp-2 leading-relaxed">{task.description}</p>
+                          <p className="text-[var(--text-secondary)] text-[11px] mb-3 line-clamp-2 leading-relaxed">{task.description}</p>
 
-                          <div className="flex items-center gap-2 text-[10px] text-[#626A86] mb-3 border-t border-[#23263A] pt-2">
+                          <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] mb-3 border-t border-[var(--border-color)] pt-2">
                             <User2 className="w-3.5 h-3.5 text-[#5B82FF]" />
                             <span>{task.assignee ? task.assignee.name : 'Unassigned'}</span>
                             <span className="text-sm">·</span>
@@ -302,13 +304,13 @@ export default function ManagerProjectDetail({
                                   setEditingTask(task);
                                   setTaskModalOpen(true);
                                 }}
-                                className="text-[#5B82FF] hover:underline text-[11px] font-medium"
+                                className="text-[#5B82FF] hover:underline text-[11px] font-medium cursor-pointer"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDeleteTask(task.id)}
-                                className="text-rose-400 hover:underline text-[11px] font-medium"
+                                className="text-rose-600 dark:text-rose-400 hover:underline text-[11px] font-medium cursor-pointer"
                               >
                                 Delete
                               </button>

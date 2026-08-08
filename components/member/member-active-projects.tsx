@@ -12,24 +12,24 @@ interface MemberActiveProjectsProps {
 
 export function MemberActiveProjects({ projects, loading, mounted }: MemberActiveProjectsProps) {
   return (
-    <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 transition-colors">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-lg font-bold text-white">Active Projects</h2>
-          <p className="text-xs text-gray-400">Projects you are contributing to</p>
+          <h2 className="text-lg font-bold text-[var(--text-primary)]">Active Projects</h2>
+          <p className="text-xs text-[var(--text-secondary)]">Projects you are contributing to</p>
         </div>
         <Link
           href="/projects"
-          className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition"
+          className="text-xs font-semibold text-[#5B82FF] hover:underline transition"
         >
           View All →
         </Link>
       </div>
 
       {loading ? (
-        <p className="text-xs text-gray-500 py-6">Loading projects...</p>
+        <p className="text-xs text-[var(--text-muted)] py-6">Loading projects...</p>
       ) : projects.length === 0 ? (
-        <p className="text-xs text-gray-500 py-6 text-center">No projects joined yet.</p>
+        <p className="text-xs text-[var(--text-muted)] py-6 text-center">No projects joined yet.</p>
       ) : (
         <div className="space-y-4">
           {projects.map((project) => {
@@ -39,11 +39,11 @@ export function MemberActiveProjects({ projects, loading, mounted }: MemberActiv
             const statusInfo = projectStatusStyle(project.status);
 
             return (
-              <div key={project.id} className="p-4 rounded-xl bg-[#0B0E17]/60 border border-[#1E253B] space-y-3">
+              <div key={project.id} className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-white">{project.name}</h3>
-                    <p className="text-[11px] text-gray-500" suppressHydrationWarning>
+                    <h3 className="font-bold text-sm text-[var(--text-primary)]">{project.name}</h3>
+                    <p className="text-[11px] text-[var(--text-secondary)]" suppressHydrationWarning>
                       Manager: {project.manager.name} • Due {mounted ? formatDate(project.endDate) : ''}
                     </p>
                   </div>
@@ -62,7 +62,7 @@ export function MemberActiveProjects({ projects, loading, mounted }: MemberActiv
                             title={m.user.name}
                             className={`w-6 h-6 rounded-full ${
                               colorPalette[idx % colorPalette.length]
-                            } text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#0B0E17] uppercase`}
+                            } text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-card)] uppercase`}
                           >
                             {getInitials(m.user.name)}
                           </div>
@@ -70,7 +70,7 @@ export function MemberActiveProjects({ projects, loading, mounted }: MemberActiv
                       ) : (
                         <div
                           title={project.manager.name}
-                          className="w-6 h-6 rounded-full bg-blue-600 text-[#fff] text-[9px] font-bold flex items-center justify-center ring-2 ring-[#0B0E17] uppercase"
+                          className="w-6 h-6 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-card)] uppercase"
                         >
                           {getInitials(project.manager.name)}
                         </div>
@@ -81,13 +81,13 @@ export function MemberActiveProjects({ projects, loading, mounted }: MemberActiv
 
                 {/* Progress Bar */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-[#181F33] rounded-full h-1.5 overflow-hidden">
+                  <div className="flex-1 bg-[var(--border-color)] rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                      className="bg-[#4E75FF] h-full rounded-full transition-all duration-500"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <span className="text-[11px] font-bold text-gray-400 min-w-[32px] text-right">
+                  <span className="text-[11px] font-bold text-[var(--text-secondary)] min-w-[32px] text-right">
                     {progress}%
                   </span>
                 </div>

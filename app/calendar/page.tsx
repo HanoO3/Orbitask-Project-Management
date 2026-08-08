@@ -130,17 +130,15 @@ export default function CalendarPage() {
     return { dayTasks: [], dayProjects: [] };
   })();
 
-
-
   return (
     <DashboardLayout title="Calendar">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight">
+          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">
             {monthNames[month]} {year}
           </h2>
-          <p className="text-xs text-[#8E95AF] mt-1">
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             Overview of upcoming workspace task deadlines and project milestones.
           </p>
         </div>
@@ -148,20 +146,20 @@ export default function CalendarPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-xl bg-[#141726] border border-[#23263A] text-[#8E95AF] hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handleToday}
-            className="text-xs font-semibold px-3.5 py-2 rounded-xl bg-[#4E75FF] hover:bg-[#5B82FF] text-white transition-all shadow-md"
+            className="text-xs font-semibold px-3.5 py-2 rounded-xl bg-[#4E75FF] hover:bg-[#5B82FF] text-white transition-all shadow-md cursor-pointer"
           >
             Today
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-xl bg-[#141726] border border-[#23263A] text-[#8E95AF] hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -172,9 +170,9 @@ export default function CalendarPage() {
       {/* Grid Container */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Calendar Month Grid (3 cols on desktop) */}
-        <div className="lg:col-span-3 bg-[#141726] border border-[#23263A] rounded-2xl p-3 sm:p-5 shadow-lg overflow-hidden">
+        <div className="lg:col-span-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3 sm:p-5 shadow-xs overflow-hidden transition-colors">
           {/* Days Header */}
-          <div className="grid grid-cols-7 text-center text-[10px] sm:text-xs font-semibold text-[#8E95AF] pb-3 border-b border-[#23263A]">
+          <div className="grid grid-cols-7 text-center text-[10px] sm:text-xs font-semibold text-[var(--text-secondary)] pb-3 border-b border-[var(--border-color)]">
             <span>SUN</span>
             <span>MON</span>
             <span>TUE</span>
@@ -185,7 +183,7 @@ export default function CalendarPage() {
           </div>
 
           {loading ? (
-            <div className="py-24 text-center text-[#8E95AF] flex items-center justify-center gap-2 text-sm">
+            <div className="py-24 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2 text-sm">
               <Loader2 className="w-5 h-5 animate-spin text-[#4E75FF]" />
               <span>Loading calendar deliverables...</span>
             </div>
@@ -219,10 +217,10 @@ export default function CalendarPage() {
                     onClick={() => handleDateClick(cellDate)}
                     className={`h-14 sm:h-20 md:h-24 rounded-xl p-1 sm:p-2 border transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
                       isSelected
-                        ? 'bg-[#1E2540] border-[#5B82FF] shadow-[0_0_12px_rgba(91,130,255,0.3)]'
+                        ? 'bg-[#5B82FF]/15 border-[#5B82FF] shadow-[0_0_12px_rgba(91,130,255,0.3)]'
                         : isToday
-                        ? 'bg-[#181C2E] border-[#4E75FF]/60'
-                        : 'bg-[#0B0D1A]/40 border-[#23263A] hover:bg-[#141726]'
+                        ? 'bg-[#4E75FF]/10 border-[#4E75FF]/60'
+                        : 'bg-[var(--bg-sidebar)] border-[var(--border-color)] hover:bg-[var(--bg-card-hover)]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -230,7 +228,7 @@ export default function CalendarPage() {
                         className={`text-xs font-bold ${
                           isToday
                             ? 'w-5 h-5 rounded-full bg-[#4E75FF] text-white flex items-center justify-center text-[11px]'
-                            : 'text-white'
+                            : 'text-[var(--text-primary)]'
                         }`}
                       >
                         {day}
@@ -244,7 +242,7 @@ export default function CalendarPage() {
                       {dayProjects.map((p) => (
                         <div
                           key={`proj-${p.id}`}
-                          className="text-[9px] font-bold text-white truncate px-1.5 py-0.5 rounded bg-purple-600/90 flex items-center"
+                          className="text-[9px] font-bold text-white truncate px-1.5 py-0.5 rounded bg-purple-600 flex items-center"
                         >
                           <ArrowRight className="w-3 h-3 mr-1" />
                           <span className="truncate">{p.name}</span>
@@ -263,7 +261,7 @@ export default function CalendarPage() {
                       ))}
 
                       {dayTasks.length > 2 && (
-                        <p className="text-[9px] text-[#8E95AF] text-right font-medium">
+                        <p className="text-[9px] text-[var(--text-secondary)] text-right font-medium">
                           +{dayTasks.length - 2} more
                         </p>
                       )}
@@ -279,17 +277,17 @@ export default function CalendarPage() {
         <div
           ref={scheduleRef}
           id="schedule-section"
-          className="lg:col-span-1 bg-[#141726] border border-[#23263A] rounded-2xl p-4 sm:p-5 shadow-lg space-y-4 scroll-mt-24"
+          className="lg:col-span-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4 scroll-mt-24 transition-colors"
         >
-          <div className="flex items-center gap-2 border-b border-[#23263A] pb-3">
+          <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3">
             <CalendarIcon className="w-4 h-4 text-[#5B82FF]" />
-            <h3 className="font-bold text-white text-sm">
+            <h3 className="font-bold text-[var(--text-primary)] text-sm">
               Schedule for {monthNames[selectedDate.getMonth()]} {selectedDate.getDate()}
             </h3>
           </div>
 
           {selectedEvents.dayProjects.length === 0 && selectedEvents.dayTasks.length === 0 ? (
-            <p className="text-xs text-[#8E95AF] py-8 text-center leading-relaxed">
+            <p className="text-xs text-[var(--text-secondary)] py-8 text-center leading-relaxed">
               No task deadlines or project milestones scheduled for this date.
             </p>
           ) : (
@@ -298,14 +296,14 @@ export default function CalendarPage() {
               {selectedEvents.dayProjects.map((p) => (
                 <div
                   key={`side-p-${p.id}`}
-                  className="p-3.5 rounded-xl bg-[#0B0D1A] border border-purple-500/30 space-y-1"
+                  className="p-3.5 rounded-xl bg-[var(--bg-card-hover)] border border-purple-500/30 space-y-1"
                 >
-                  <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
                     Project Deadline
                   </span>
-                  <h4 className="text-xs font-bold text-white">{p.name}</h4>
-                  <p className="text-[11px] text-[#8E95AF] flex items-center gap-1 mt-1">
-                    <Clock className="w-3 h-3 text-[#626A86]" /> Final Deliverables Due
+                  <h4 className="text-xs font-bold text-[var(--text-primary)]">{p.name}</h4>
+                  <p className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1 mt-1">
+                    <Clock className="w-3 h-3 text-[var(--text-muted)]" /> Final Deliverables Due
                   </p>
                 </div>
               ))}
@@ -315,7 +313,7 @@ export default function CalendarPage() {
                 <Link
                   key={`side-t-${t.id}`}
                   href={`/tasks/${t.id}`}
-                  className="p-3.5 rounded-xl bg-[#0B0D1A] border border-[#23263A] hover:border-[#5B82FF] transition-all block group space-y-1"
+                  className="p-3.5 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] hover:border-[#5B82FF] transition-all block group space-y-1"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-[#5B82FF] uppercase tracking-wider">
@@ -329,12 +327,12 @@ export default function CalendarPage() {
                       {t.priority}
                     </span>
                   </div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-[#5B82FF] transition-colors">
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[#5B82FF] transition-colors">
                     {t.title}
                   </h4>
-                  <p className="text-[11px] text-[#8E95AF] flex items-center justify-between mt-1">
+                  <p className="text-[11px] text-[var(--text-secondary)] flex items-center justify-between mt-1">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#626A86]" /> Status: {t.status}
+                      <Clock className="w-3 h-3 text-[var(--text-muted)]" /> Status: {t.status}
                     </span>
                     <ArrowRight className="w-3 h-3 text-[#5B82FF] group-hover:translate-x-1 transition-transform" />
                   </p>

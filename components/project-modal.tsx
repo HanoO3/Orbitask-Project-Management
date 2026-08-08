@@ -102,70 +102,70 @@ export function ProjectModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-      <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto text-white">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#23263A]">
-          <h2 className="text-base font-bold text-white">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto text-[var(--text-primary)] transition-colors">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--border-color)]">
+          <h2 className="text-base font-bold text-[var(--text-primary)]">
             {editingProject ? 'Edit Project' : 'Create New Project'}
           </h2>
-          <button onClick={onClose} className="text-[#8E95AF] hover:text-white p-1 rounded-lg">
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-lg cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && <div className="p-3 bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs rounded-xl">{error}</div>}
+          {error && <div className="p-3 bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs rounded-xl">{error}</div>}
 
           <div>
-            <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Project Name *</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Project Name *</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Website Redesign"
-              className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Description</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Description</label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Project goals and deliverables..."
-              className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF]"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Start Date *</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Start Date *</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">End Date *</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">End Date *</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Priority</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Priority</label>
               <select
                 value={priority}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT')}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -175,11 +175,11 @@ export function ProjectModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Status</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Status</label>
               <select
                 value={status}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as 'NOT_STARTED' | 'IN_PROGRESS' | 'ON_HOLD' | 'COMPLETED')}
-                className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="NOT_STARTED">Not Started</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -190,11 +190,11 @@ export function ProjectModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Project Manager *</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">Project Manager *</label>
             <select
               value={managerId}
               onChange={(e) => setManagerId(e.target.value)}
-              className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
             >
               <option value="">Select a manager...</option>
               {managers.map((m) => (
@@ -205,18 +205,18 @@ export function ProjectModal({
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#23263A]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-color)]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-[#8E95AF] hover:text-white rounded-xl"
+              className="px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-xl cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2 text-xs font-semibold rounded-xl shadow-md disabled:opacity-50"
+              className="bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2 text-xs font-semibold rounded-xl shadow-md disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Saving...' : editingProject ? 'Save Changes' : 'Create Project'}
             </button>

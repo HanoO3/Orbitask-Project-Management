@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <MobileNavContext.Provider
       value={{ mobileOpen, setMobileOpen, toggleMobileNav, closeMobileNav }}
     >
-      <div className="min-h-screen bg-[#0B0E17] text-white flex flex-col lg:flex-row w-full max-w-full overflow-x-hidden">
+      <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] flex flex-col lg:flex-row w-full max-w-full overflow-x-hidden transition-colors">
         <Sidebar />
         <main className="flex-1 lg:pl-64 transition-all min-w-0 w-full overflow-x-hidden">
           {children}
@@ -51,4 +51,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </MobileNavContext.Provider>
   );
 }
-

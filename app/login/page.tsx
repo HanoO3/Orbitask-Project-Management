@@ -68,8 +68,8 @@ function LoginFormContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D1A] flex items-center justify-center p-4 md:p-8 select-none">
-      <div className="w-full max-w-5xl bg-[#141726] border border-[#23263A] rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center p-4 md:p-8 select-none transition-colors">
+      <div className="w-full max-w-5xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         {/* Left Form Panel */}
         <div className="p-8 md:p-12 flex flex-col justify-between">
           <div>
@@ -80,18 +80,18 @@ function LoginFormContent() {
 
             {/* Welcome Back Header */}
             <div className="mb-8">
-              <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
                 Welcome Back
               </h2>
-              <p className="text-sm text-[#8E95AF] mt-1.5">
+              <p className="text-sm text-[var(--text-secondary)] mt-1.5">
                 Enter your credentials to access your project workspace.
               </p>
             </div>
 
             {/* Error Alert */}
             {error && (
-              <div className="mb-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <div className="mb-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                 <span>{error}</span>
               </div>
             )}
@@ -100,48 +100,48 @@ function LoginFormContent() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+                  <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-11 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+                  <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-11 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all"
                   />
                 </div>
               </div>
 
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 text-[#8E95AF] cursor-pointer hover:text-white transition-colors">
+                <label className="flex items-center gap-2 text-[var(--text-secondary)] cursor-pointer hover:text-[var(--text-primary)] transition-colors">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-[#23263A] bg-[#0B0D1A] text-[#4E75FF] focus:ring-0 accent-[#4E75FF]"
+                    className="w-4 h-4 rounded border-[var(--border-color)] bg-[var(--bg-input)] text-[#4E75FF] focus:ring-0 accent-[#4E75FF]"
                   />
                   <span>Remember me</span>
                 </label>
@@ -155,7 +155,7 @@ function LoginFormContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex items-center justify-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(78,117,255,0.4)] transition-all active:scale-[0.99] disabled:opacity-50"
+                className="w-full mt-2 flex items-center justify-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white py-3 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(78,117,255,0.4)] transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <>
@@ -170,12 +170,10 @@ function LoginFormContent() {
                 )}
               </button>
             </form>
-
-
           </div>
 
           {/* Footer Link to Signup */}
-          <div className="mt-8 text-center text-xs text-[#8E95AF]">
+          <div className="mt-8 text-center text-xs text-[var(--text-secondary)]">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-[#5B82FF] font-semibold hover:underline">
               Create an account
@@ -184,18 +182,18 @@ function LoginFormContent() {
         </div>
 
         {/* Right Desktop Illustration Panel */}
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#090B17] via-[#121527] to-[#1A1E36] border-l border-[#23263A] relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#4E75FF]/10 via-[var(--bg-card-hover)] to-[var(--bg-card)] border-l border-[var(--border-color)] relative overflow-hidden">
           <div className="absolute -top-20 -right-20 w-80 h-80 bg-[#5B82FF]/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#4E75FF]/15 text-[#5B82FF] border border-[#5B82FF]/30 mb-6">
               <ShieldCheck className="w-3.5 h-3.5" /> Next-Gen Workspace
             </span>
-            <h3 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
+            <h3 className="text-3xl font-extrabold text-[var(--text-primary)] leading-tight tracking-tight">
               Manage projects with ultimate clarity and precision.
             </h3>
-            <p className="text-sm text-[#8E95AF] mt-3 leading-relaxed">
-              Track real-time tasks, team activities, sprint deadlines, and progress analytics in one dark-mode hub.
+            <p className="text-sm text-[var(--text-secondary)] mt-3 leading-relaxed">
+              Track real-time tasks, team activities, sprint deadlines, and progress analytics in one centralized hub.
             </p>
           </div>
 
@@ -204,7 +202,7 @@ function LoginFormContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative z-10 bg-[#141726]/80 backdrop-blur-md border border-[#23263A] rounded-2xl p-5 shadow-2xl space-y-4 my-8"
+            className="relative z-10 bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-color)] rounded-2xl p-5 shadow-2xl space-y-4 my-8"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -212,21 +210,21 @@ function LoginFormContent() {
                   <CheckCircle2 className="w-4 h-4 text-[#5B82FF]" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Orbitask Workspace Hub</h4>
-                  <p className="text-[10px] text-[#8E95AF]">Real-time Sprint Analytics</p>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)]">Orbitask Workspace Hub</h4>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Real-time Sprint Analytics</p>
                 </div>
               </div>
-              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
                 Active
               </span>
             </div>
 
-            <div className="w-full bg-[#1C2035] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-[var(--border-color)] h-2 rounded-full overflow-hidden">
               <div className="bg-[#4E75FF] h-full w-[100%] rounded-full shadow-[0_0_8px_rgba(78,117,255,0.6)] animate-pulse" />
             </div>
           </motion.div>
 
-          <div className="relative z-10 text-xs text-[#626A86] flex items-center justify-between">
+          <div className="relative z-10 text-xs text-[var(--text-muted)] flex items-center justify-between">
             <span>© 2026 Orbitask Platform</span>
             <span>v2.4 Production</span>
           </div>
@@ -238,7 +236,7 @@ function LoginFormContent() {
 
 export default function LoginPage() {
   return (
-    <React.Suspense fallback={<div className="min-h-screen bg-[#0B0D1A] flex items-center justify-center text-white text-xs">Loading...</div>}>
+    <React.Suspense fallback={<div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center text-[var(--text-primary)] text-xs">Loading...</div>}>
       <LoginFormContent />
     </React.Suspense>
   );

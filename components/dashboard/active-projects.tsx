@@ -14,25 +14,25 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
     switch (status) {
       case 'On track':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30">
             On track
           </span>
         );
       case 'At risk':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30">
             At risk
           </span>
         );
       case 'Delayed':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-500/15 text-rose-400 border border-rose-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/30">
             Delayed
           </span>
         );
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-500/15 text-blue-400 border border-blue-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30">
             {status}
           </span>
         );
@@ -40,19 +40,19 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
   };
 
   return (
-    <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-5 shadow-lg flex flex-col justify-between h-full">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-xs flex flex-col justify-between h-full transition-colors">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-base md:text-lg font-bold text-white tracking-tight">
+          <h3 className="text-base md:text-lg font-bold text-[var(--text-primary)] tracking-tight">
             Active Projects
           </h3>
-          <p className="text-xs text-[#8E95AF] mt-0.5">
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">
             Track progress across your teams
           </p>
         </div>
         <button
-          className="text-[#8E95AF] hover:text-white p-1 rounded-lg hover:bg-[#1E2338] transition-colors"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-lg hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer"
           aria-label="Options"
         >
           <MoreHorizontal className="w-5 h-5" />
@@ -72,10 +72,10 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
             {/* Project Info Header */}
             <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
               <div>
-                <h4 className="text-sm font-semibold text-white group-hover:text-[#5B82FF] transition-colors">
+                <h4 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[#5B82FF] transition-colors">
                   {project.name}
                 </h4>
-                <p className="text-[11px] text-[#8E95AF]">
+                <p className="text-[11px] text-[var(--text-secondary)]">
                   Due {project.dueDate}
                 </p>
               </div>
@@ -90,7 +90,7 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
                     <div
                       key={member.id}
                       title={member.name}
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-white ring-2 ring-[#141726] ${member.avatarBg}`}
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-white ring-2 ring-[var(--bg-card)] ${member.avatarBg}`}
                     >
                       {member.initials}
                     </div>
@@ -101,7 +101,7 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
 
             {/* Progress Bar & Percentage */}
             <div className="space-y-1">
-              <div className="w-full bg-[#1C2035] rounded-full h-1.5 overflow-hidden">
+              <div className="w-full bg-[var(--border-color)] rounded-full h-1.5 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${project.progress}%` }}
@@ -110,7 +110,7 @@ export const ActiveProjectsCard: React.FC<ActiveProjectsProps> = ({ projects }) 
                 />
               </div>
               <div className="text-right">
-                <span className="text-[11px] font-medium text-[#8E95AF]">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)]">
                   {project.progress}%
                 </span>
               </div>

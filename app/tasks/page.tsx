@@ -124,25 +124,25 @@ export default function TasksPage() {
     switch (priority) {
       case 'URGENT':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30">
             Urgent
           </span>
         );
       case 'HIGH':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
             High
           </span>
         );
       case 'MEDIUM':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
             Medium
           </span>
         );
       case 'LOW':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300 border border-slate-600/40">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-600/40">
             Low
           </span>
         );
@@ -154,8 +154,8 @@ export default function TasksPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight">Task Workspace</h2>
-          <p className="text-xs text-[#8E95AF] mt-1">
+          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Task Workspace</h2>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             Track and complete real deliverables assigned across workspace projects.
           </p>
         </div>
@@ -163,20 +163,20 @@ export default function TasksPage() {
         {/* Search & Sort */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search tasks or projects..."
-              className="w-full bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-9 pr-4 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF]"
             />
           </div>
 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'status' | 'title')}
-            className="bg-[#141726] border border-[#23263A] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+            className="bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
           >
             <option value="dueDate">Sort by Due Date</option>
             <option value="priority">Sort by Priority</option>
@@ -187,15 +187,15 @@ export default function TasksPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto max-w-full scrollbar-none">
+      <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3 overflow-x-auto max-w-full scrollbar-none">
         {['All', 'In Progress', 'Overdue', 'Completed'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
               activeTab === tab
                 ? 'bg-[#4E75FF] text-white shadow-md'
-                : 'bg-[#141726] text-[#8E95AF] hover:text-white border border-[#23263A]'
+                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
             }`}
           >
             {tab}
@@ -204,19 +204,19 @@ export default function TasksPage() {
       </div>
 
       {/* Tasks Table/List Card */}
-      <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-5 shadow-lg space-y-3">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-xs space-y-3 transition-colors">
         {loading ? (
-          <div className="py-16 text-center text-[#8E95AF] flex items-center justify-center gap-2 text-sm">
+          <div className="py-16 text-center text-[var(--text-secondary)] flex items-center justify-center gap-2 text-sm">
             <Loader2 className="w-5 h-5 animate-spin text-[#4E75FF]" />
             <span>Loading workspace tasks...</span>
           </div>
         ) : filteredTasks.length === 0 ? (
           <div className="py-16 text-center max-w-md mx-auto space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center mx-auto text-[#5B82FF]">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] flex items-center justify-center mx-auto text-[#5B82FF]">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white">No tasks found</h3>
-            <p className="text-xs text-[#8E95AF]">
+            <h3 className="text-base font-bold text-[var(--text-primary)]">No tasks found</h3>
+            <p className="text-xs text-[var(--text-secondary)]">
               {searchQuery || activeTab !== 'All'
                 ? 'No deliverables match your search or tab filter.'
                 : 'You have no assigned tasks in this workspace.'}
@@ -236,16 +236,16 @@ export default function TasksPage() {
               >
                 <Link
                   href={`/tasks/${task.id}`}
-                  className="p-4 rounded-xl bg-[#0B0D1A]/50 border border-[#23263A] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#5B82FF] transition-all group block"
+                  className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#5B82FF] transition-all group block"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <button
                       onClick={(e) => handleToggleTask(task.id, e)}
                       disabled={togglingId === task.id}
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
+                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                         isCompleted
                           ? 'bg-[#4E75FF] border-[#4E75FF] text-white'
-                          : 'border-[#333754] hover:border-[#5B82FF] bg-[#121524]'
+                          : 'border-[var(--border-color)] hover:border-[#5B82FF] bg-[var(--bg-input)]'
                       }`}
                     >
                       {togglingId === task.id ? (
@@ -258,7 +258,7 @@ export default function TasksPage() {
                     <div className="min-w-0">
                       <p
                         className={`text-sm font-semibold truncate group-hover:text-[#5B82FF] transition-colors ${
-                          isCompleted ? 'line-through text-[#626A86]' : 'text-white'
+                          isCompleted ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'
                         }`}
                       >
                         {task.title}
@@ -266,7 +266,7 @@ export default function TasksPage() {
                       <div className="flex items-center gap-2 mt-0.5 text-xs">
                         <span className="text-[#5B82FF] font-medium">{task.project?.name || 'Workspace'}</span>
                         {task.assignee && (
-                          <span className="text-[#8E95AF] text-[11px]">
+                          <span className="text-[var(--text-secondary)] text-[11px]">
                             • Assigned to: {task.assignee.name}
                           </span>
                         )}
@@ -274,9 +274,9 @@ export default function TasksPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 border-[#23263A] pt-2 sm:pt-0">
-                    <div className={`flex items-center gap-1 text-xs ${overdue ? 'text-rose-400 font-medium' : 'text-[#8E95AF]'}`}>
-                      <Clock className="w-3.5 h-3.5" />
+                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 border-[var(--border-color)] pt-2 sm:pt-0">
+                    <div className={`flex items-center gap-1 text-xs ${overdue ? 'text-rose-600 dark:text-rose-400 font-medium' : 'text-[var(--text-secondary)]'}`}>
+                      <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                       <span>{formatDueDate(task.dueDate)}</span>
                     </div>
                     {getPriorityBadge(task.priority)}

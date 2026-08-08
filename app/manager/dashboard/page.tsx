@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { getMyProjects, getMyProjectStats } from "@/lib/actions/manager-projects";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { Users, ClipboardList, CalendarDays } from "lucide-react";
 import { AnalyticsSection } from "@/components/analytics/analytics-section";
@@ -65,7 +66,7 @@ export default function ManagerDashboard() {
   const userName = session?.user?.name ? session.user.name.split(" ")[0] : "Manager";
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <DashboardGreeting
@@ -74,8 +75,9 @@ export default function ManagerDashboard() {
         />
 
         <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <ThemeToggle />
           <NotificationBell />
-          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
+          <div className="w-9 h-9 rounded-full bg-[#4E75FF] text-white font-bold text-xs flex items-center justify-center shadow-md uppercase">
             {session?.user?.name
               ? session.user.name
                   .split(" ")
@@ -90,32 +92,32 @@ export default function ManagerDashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
-          <p className="text-xs font-medium text-gray-400">Total Projects</p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">{stats.totalProjects}</p>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
+          <p className="text-xs font-medium text-[var(--text-secondary)]">Total Projects</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] mt-1.5">{stats.totalProjects}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
-          <p className="text-xs font-medium text-gray-400">Active Projects</p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-blue-400 mt-1.5">{stats.activeProjects}</p>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
+          <p className="text-xs font-medium text-[var(--text-secondary)]">Active Projects</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#5B82FF] mt-1.5">{stats.activeProjects}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
-          <p className="text-xs font-medium text-gray-400">Pending Tasks</p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1.5">{stats.pendingTasks}</p>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
+          <p className="text-xs font-medium text-[var(--text-secondary)]">Pending Tasks</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5">{stats.pendingTasks}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
-          <p className="text-xs font-medium text-gray-400">Completed Tasks</p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1.5">{stats.completedTasks}</p>
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
+          <p className="text-xs font-medium text-[var(--text-secondary)]">Completed Tasks</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5">{stats.completedTasks}</p>
         </div>
       </div>
 
       {/* Projects List */}
-      <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-6">
-        <h2 className="text-lg font-bold text-white mb-4">My Assigned Projects</h2>
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 transition-colors">
+        <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">My Assigned Projects</h2>
 
         {loading ? (
-          <p className="text-xs text-gray-500 py-6">Loading projects...</p>
+          <p className="text-xs text-[var(--text-muted)] py-6">Loading projects...</p>
         ) : projects.length === 0 ? (
-          <p className="text-xs text-gray-500 py-6">No projects assigned yet.</p>
+          <p className="text-xs text-[var(--text-muted)] py-6">No projects assigned yet.</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {projects.map((project) => {
@@ -127,36 +129,36 @@ export default function ManagerDashboard() {
                 <Link
                   key={project.id}
                   href={`/manager/projects/${project.id}`}
-                  className="bg-[#0B0E17]/60 border border-[#1E253B] p-5 rounded-2xl hover:border-blue-500/50 transition block space-y-3"
+                  className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-5 rounded-2xl hover:border-[#5B82FF]/50 transition block space-y-3 cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-base text-white">{project.name}</h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                    <h3 className="font-bold text-base text-[var(--text-primary)]">{project.name}</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30">
                       {project.status.replace("_", " ")}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-2">{project.description}</p>
+                  <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{project.description}</p>
 
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                     <span className="inline-flex items-center gap-1">
-                      <ClipboardList className="w-4 h-4" />
+                      <ClipboardList className="w-4 h-4 text-[var(--text-muted)]" />
                       {project._count.tasks} tasks
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Users className="w-4 h-4" />
+                      <Users className="w-4 h-4 text-[var(--text-muted)]" />
                       {project._count.members} members
                     </span>
                     <span className="inline-flex items-center gap-1" suppressHydrationWarning>
-                      <CalendarDays className="w-4 h-4" />
+                      <CalendarDays className="w-4 h-4 text-[var(--text-muted)]" />
                       {mounted ? formatDate(project.startDate) : ""} - {mounted ? formatDate(project.endDate) : ""}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-[#181F33] rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-blue-500 h-full rounded-full" style={{ width: `${progress}%` }} />
+                    <div className="flex-1 bg-[var(--border-color)] rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-[#4E75FF] h-full rounded-full" style={{ width: `${progress}%` }} />
                     </div>
-                    <span className="text-[11px] font-bold text-gray-400">{progress}%</span>
+                    <span className="text-[11px] font-bold text-[var(--text-secondary)]">{progress}%</span>
                   </div>
                 </Link>
               );

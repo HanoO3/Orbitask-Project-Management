@@ -299,27 +299,27 @@ export default function MessagesPage() {
 
   return (
     <DashboardLayout title="Messages">
-      <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[520px] grid grid-cols-1 md:grid-cols-4">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[520px] grid grid-cols-1 md:grid-cols-4 transition-colors">
         {/* Left Channels & DM List */}
-        <div className={`md:col-span-1 border-r border-[#23263A] bg-[#090B17] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`md:col-span-1 border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           <div>
             <div className="relative mb-4">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search messages..."
-                className="w-full bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF] transition-all"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl pl-9 pr-3 py-2 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] transition-all"
               />
             </div>
 
-            <h3 className="font-bold text-white text-xs uppercase tracking-wider mb-3 text-[#8E95AF]">
+            <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-[var(--text-secondary)]">
               Workspace Channels
             </h3>
 
             {loadingChannels ? (
-              <div className="py-4 text-center text-xs text-[#8E95AF] flex items-center justify-center gap-2">
+              <div className="py-4 text-center text-xs text-[var(--text-secondary)] flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-[#4E75FF]" />
                 <span>Loading channels...</span>
               </div>
@@ -331,10 +331,10 @@ export default function MessagesPage() {
                       setActiveChannel({ id: 'general', name: 'general', type: 'channel' });
                       setMobileChatView(true);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       activeChannel.name === 'general' && activeChannel.type === 'channel'
                         ? 'bg-[#4E75FF] text-white shadow-md'
-                        : 'text-[#8E95AF] hover:text-white hover:bg-[#141726]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
                     }`}
                   >
                     <Hash className="w-4 h-4" />
@@ -349,10 +349,10 @@ export default function MessagesPage() {
                       setActiveChannel({ id: proj.id, name: proj.name, type: 'channel' });
                       setMobileChatView(true);
                     }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all truncate ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all truncate cursor-pointer ${
                       activeChannel.name === proj.name && activeChannel.type === 'channel'
                         ? 'bg-[#4E75FF] text-white shadow-md'
-                        : 'text-[#8E95AF] hover:text-white hover:bg-[#141726]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)]'
                     }`}
                   >
                     <Hash className="w-4 h-4 shrink-0" />
@@ -362,12 +362,12 @@ export default function MessagesPage() {
               </div>
             )}
 
-            <h3 className="font-bold text-white text-xs uppercase tracking-wider mb-3 text-[#8E95AF]">
+            <h3 className="font-bold text-xs uppercase tracking-wider mb-3 text-[var(--text-secondary)]">
               Direct Messages
             </h3>
 
             {loadingChannels ? (
-              <div className="py-4 text-center text-xs text-[#8E95AF]">Loading members...</div>
+              <div className="py-4 text-center text-xs text-[var(--text-secondary)]">Loading members...</div>
             ) : (
               <div className="space-y-1.5 max-h-56 overflow-y-auto">
                 {filteredUsers.map((member, idx) => {
@@ -387,7 +387,7 @@ export default function MessagesPage() {
                         setMobileChatView(true);
                       }}
                       className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
-                        isSelected ? 'bg-[#1D2236] border border-[#5B82FF]/40' : 'hover:bg-[#141726]'
+                        isSelected ? 'bg-[#5B82FF]/15 border border-[#5B82FF]/40' : 'hover:bg-[var(--bg-card-hover)]'
                       }`}
                     >
                       <div
@@ -396,8 +396,8 @@ export default function MessagesPage() {
                         {initials}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold text-white truncate">{member.name}</p>
-                        <p className="text-[10px] text-[#8E95AF] truncate">{formatRole(member.role)}</p>
+                        <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{member.name}</p>
+                        <p className="text-[10px] text-[var(--text-secondary)] truncate">{formatRole(member.role)}</p>
                       </div>
                     </div>
                   );
@@ -408,13 +408,13 @@ export default function MessagesPage() {
         </div>
 
         {/* Right Active Chat View */}
-        <div className={`md:col-span-3 flex-col justify-between bg-[#141726] ${!mobileChatView ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`md:col-span-3 flex-col justify-between bg-[var(--bg-card)] ${!mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           {/* Chat Header */}
-          <div className="p-4 border-b border-[#23263A] flex items-center justify-between">
+          <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
               <button
                 onClick={() => setMobileChatView(false)}
-                className="md:hidden text-[#8E95AF] hover:text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[#090B17] border border-[#23263A] shrink-0 mr-1"
+                className="md:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[var(--bg-sidebar)] border border-[var(--border-color)] shrink-0 mr-1 cursor-pointer"
               >
                 ← Channels
               </button>
@@ -423,7 +423,7 @@ export default function MessagesPage() {
               ) : (
                 <MessageSquare className="w-5 h-5 text-[#5B82FF] shrink-0" />
               )}
-              <h3 className="font-bold text-white text-sm sm:text-base truncate">
+              <h3 className="font-bold text-[var(--text-primary)] text-sm sm:text-base truncate">
                 {activeChannel.type === 'channel' ? `#${activeChannel.name}` : activeChannel.name}
               </h3>
             </div>
@@ -432,13 +432,13 @@ export default function MessagesPage() {
           {/* Messages Stream */}
           <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
             {loadingMessages ? (
-              <div className="py-16 text-center text-xs text-[#8E95AF] flex items-center justify-center gap-2">
+              <div className="py-16 text-center text-xs text-[var(--text-secondary)] flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-[#4E75FF]" />
                 <span>Loading messages from database...</span>
               </div>
             ) : messages.length === 0 ? (
-              <div className="py-16 text-center text-xs text-[#8E95AF] space-y-1">
-                <p className="font-semibold text-white">No messages in this chat yet</p>
+              <div className="py-16 text-center text-xs text-[var(--text-secondary)] space-y-1">
+                <p className="font-semibold text-[var(--text-primary)]">No messages in this chat yet</p>
                 <p>Send a message below to start communicating with your team.</p>
               </div>
             ) : (
@@ -462,8 +462,8 @@ export default function MessagesPage() {
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase shadow-sm ${
-                        msg.isSelf ? 'bg-[#4E75FF]' : msg.avatarBg || 'bg-slate-700'
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase shadow-xs ${
+                        msg.isSelf ? 'bg-[#4E75FF]' : msg.avatarBg || 'bg-slate-600'
                       }`}
                     >
                       {msg.senderInitials}
@@ -473,14 +473,14 @@ export default function MessagesPage() {
                       {/* Action Menu (Reply, React, Delete) */}
                       {!msg.isDeleted && (
                         <div
-                          className={`absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1C2035] border border-[#23263A] rounded-xl p-1 flex items-center gap-1 z-10 shadow-lg ${
+                          className={`absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-1 flex items-center gap-1 z-10 shadow-lg ${
                             msg.isSelf ? 'right-full mr-2' : 'left-full ml-2'
                           }`}
                         >
                           <button
                             onClick={() => setReplyingMsg(msg)}
                             title="Reply"
-                            className="p-1.5 hover:bg-[#2B314F] rounded-lg text-[#8E95AF] hover:text-white transition-colors"
+                            className="p-1.5 hover:bg-[var(--bg-card-hover)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                           >
                             <Reply className="w-3.5 h-3.5" />
                           </button>
@@ -490,19 +490,19 @@ export default function MessagesPage() {
                                 setShowEmojiMenuMsgId(showEmojiMenuMsgId === msg.id ? null : msg.id)
                               }
                               title="React"
-                              className="p-1.5 hover:bg-[#2B314F] rounded-lg text-[#8E95AF] hover:text-white transition-colors"
+                              className="p-1.5 hover:bg-[var(--bg-card-hover)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                             >
                               <Smile className="w-3.5 h-3.5" />
                             </button>
 
                             {/* Emoji Picker Popup */}
                             {showEmojiMenuMsgId === msg.id && (
-                              <div className="absolute bottom-full mb-2 left-0 bg-[#0B0D1A] border border-[#23263A] rounded-xl p-2 flex gap-1 shadow-2xl z-20">
+                              <div className="absolute bottom-full mb-2 left-0 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-2 flex gap-1 shadow-2xl z-20">
                                 {EMOJI_LIST.map((emoji) => (
                                   <button
                                     key={emoji}
                                     onClick={() => handleReact(msg.id, emoji)}
-                                    className="hover:scale-125 transition-transform p-1 text-sm"
+                                    className="hover:scale-125 transition-transform p-1 text-sm cursor-pointer"
                                   >
                                     {emoji}
                                   </button>
@@ -515,7 +515,7 @@ export default function MessagesPage() {
                             <button
                               onClick={() => handleDelete(msg.id)}
                               title="Delete"
-                              className="p-1.5 hover:bg-rose-500/20 rounded-lg text-rose-400 transition-colors"
+                              className="p-1.5 hover:bg-rose-500/20 rounded-lg text-rose-500 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -525,7 +525,7 @@ export default function MessagesPage() {
 
                       {/* Quoted Reply Box */}
                       {msg.replyTo && (
-                        <div className="bg-[#1A1E32] border-l-2 border-[#5B82FF] px-3 py-1.5 rounded-lg text-[11px] text-[#8E95AF]">
+                        <div className="bg-[var(--bg-card-hover)] border-l-2 border-[#5B82FF] px-3 py-1.5 rounded-lg text-[11px] text-[var(--text-secondary)]">
                           <span className="font-semibold text-[#5B82FF] mr-1">
                             Replying to {msg.replyTo.senderName}:
                           </span>
@@ -539,17 +539,17 @@ export default function MessagesPage() {
                       <div
                         className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
                           msg.isDeleted
-                            ? 'bg-[#181B2B] text-[#626A86] italic border border-[#23263A]'
+                            ? 'bg-[var(--bg-card-hover)] text-[var(--text-muted)] italic border border-[var(--border-color)]'
                             : msg.isSelf
                             ? 'bg-[#4E75FF] text-white rounded-tr-none shadow-md'
-                            : 'bg-[#0B0D1A] text-white border border-[#23263A] rounded-tl-none'
+                            : 'bg-[var(--bg-sidebar)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-tl-none'
                         }`}
                       >
                         {!msg.isSelf && !msg.isDeleted && (
                           <p className="font-bold text-[#5B82FF] mb-1 text-[11px]">
                             {msg.senderName}
                             {msg.senderRole && (
-                              <span className="text-[#8E95AF] font-normal ml-1 border-l border-[#23263A] pl-1">
+                              <span className="text-[var(--text-secondary)] font-normal ml-1 border-l border-[var(--border-color)] pl-1">
                                 {msg.senderRole}
                               </span>
                             )}
@@ -567,12 +567,12 @@ export default function MessagesPage() {
                                 href={att.fileUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-2 p-2 rounded-xl bg-black/20 hover:bg-black/40 border border-white/10 text-white transition-colors"
+                                className="flex items-center gap-2 p-2 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-[#5B82FF] transition-colors"
                               >
                                 <FileText className="w-4 h-4 text-[#5B82FF] shrink-0" />
                                 <div className="min-w-0 flex-1">
                                   <p className="text-[11px] font-semibold truncate">{att.fileName}</p>
-                                  <p className="text-[9px] text-white/70">
+                                  <p className="text-[9px] text-[var(--text-secondary)]">
                                     {(att.fileSize / 1024).toFixed(1)} KB
                                   </p>
                                 </div>
@@ -583,7 +583,7 @@ export default function MessagesPage() {
 
                         <p
                           className={`text-[10px] mt-1.5 text-right ${
-                            msg.isSelf ? 'text-white/70' : 'text-[#8E95AF]'
+                            msg.isSelf ? 'text-white/80' : 'text-[var(--text-secondary)]'
                           }`}
                         >
                           {msg.time}
@@ -597,10 +597,10 @@ export default function MessagesPage() {
                             <button
                               key={emoji}
                               onClick={() => handleReact(msg.id, emoji)}
-                              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
+                              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors cursor-pointer ${
                                 group.hasReacted
-                                  ? 'bg-[#4E75FF]/20 border-[#5B82FF] text-white'
-                                  : 'bg-[#141726] border-[#23263A] text-[#8E95AF] hover:text-white'
+                                  ? 'bg-[#4E75FF]/20 border-[#5B82FF] text-[var(--text-primary)]'
+                                  : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                               }`}
                             >
                               <span>{emoji}</span>
@@ -617,20 +617,20 @@ export default function MessagesPage() {
           </div>
 
           {/* Input Form & Composer */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-[#23263A] bg-[#090B17] space-y-2">
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-2">
             {/* Replying Preview Banner */}
             {replyingMsg && (
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#1D2236] border border-[#5B82FF]/40 text-xs">
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#5B82FF]/10 border border-[#5B82FF]/40 text-xs">
                 <div className="flex items-center gap-2 truncate">
                   <Reply className="w-3.5 h-3.5 text-[#5B82FF] shrink-0" />
-                  <span className="text-[#8E95AF]">Replying to</span>
-                  <span className="font-bold text-white truncate">{replyingMsg.senderName}</span>
-                  <span className="text-[#626A86] truncate">&quot;{replyingMsg.text}&quot;</span>
+                  <span className="text-[var(--text-secondary)]">Replying to</span>
+                  <span className="font-bold text-[var(--text-primary)] truncate">{replyingMsg.senderName}</span>
+                  <span className="text-[var(--text-muted)] truncate">&quot;{replyingMsg.text}&quot;</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setReplyingMsg(null)}
-                  className="text-[#8E95AF] hover:text-white shrink-0 ml-2"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] shrink-0 ml-2 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -639,18 +639,18 @@ export default function MessagesPage() {
 
             {/* Selected File Attachment Banner */}
             {selectedFile && (
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#1D2236] border border-[#5B82FF]/40 text-xs">
+              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#5B82FF]/10 border border-[#5B82FF]/40 text-xs">
                 <div className="flex items-center gap-2 truncate">
                   <Paperclip className="w-3.5 h-3.5 text-[#5B82FF] shrink-0" />
-                  <span className="font-semibold text-white truncate">{selectedFile.fileName}</span>
-                  <span className="text-[10px] text-[#8E95AF]">
+                  <span className="font-semibold text-[var(--text-primary)] truncate">{selectedFile.fileName}</span>
+                  <span className="text-[10px] text-[var(--text-secondary)]">
                     ({(selectedFile.fileSize / 1024).toFixed(1)} KB)
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedFile(null)}
-                  className="text-[#8E95AF] hover:text-white shrink-0 ml-2"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] shrink-0 ml-2 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -660,7 +660,7 @@ export default function MessagesPage() {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="chat-file-upload"
-                className="p-2.5 bg-[#141726] border border-[#23263A] text-[#8E95AF] hover:text-white rounded-xl cursor-pointer transition-colors shrink-0"
+                className="p-2.5 bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-xl cursor-pointer transition-colors shrink-0"
                 title="Attach file (max 10MB)"
               >
                 <Paperclip className="w-4 h-4" />
@@ -682,12 +682,12 @@ export default function MessagesPage() {
                     ? `Message #${activeChannel.name}...`
                     : `Message ${activeChannel.name}...`
                 }
-                className="flex-1 bg-[#141726] border border-[#23263A] rounded-xl px-4 py-2.5 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF] disabled:opacity-50"
+                className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={sending}
-                className="bg-[#4E75FF] hover:bg-[#5B82FF] text-white p-2.5 rounded-xl transition-all shadow-md active:scale-95 shrink-0 disabled:opacity-50"
+                className="bg-[#4E75FF] hover:bg-[#5B82FF] text-white p-2.5 rounded-xl transition-all shadow-md active:scale-95 shrink-0 disabled:opacity-50 cursor-pointer"
               >
                 {sending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

@@ -164,14 +164,14 @@ export default function SettingsPage() {
     <DashboardLayout title="Settings">
       {/* Header */}
       <div className="pb-2">
-        <h2 className="text-2xl font-extrabold text-white tracking-tight">Account Settings</h2>
-        <p className="text-xs text-[#8E95AF] mt-1">
+        <h2 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Account Settings</h2>
+        <p className="text-xs text-[var(--text-secondary)] mt-1">
           Manage your personal details, workspace preferences, and team permissions.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto max-w-full scrollbar-none">
+      <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3 overflow-x-auto max-w-full scrollbar-none">
         {[
           { id: 'profile', label: 'Profile', icon: User },
           { id: 'security', label: 'Security', icon: Shield },
@@ -182,14 +182,14 @@ export default function SettingsPage() {
           return (
             <button
               key={tab.id}
-                onClick={() => {
+              onClick={() => {
                 setActiveTab(tab.id as 'profile' | 'security' | 'notifications' | 'team');
                 setMessage(null);
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-[#4E75FF] text-white shadow-md'
-                  : 'bg-[#141726] text-[#8E95AF] hover:text-white border border-[#23263A]'
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -204,8 +204,8 @@ export default function SettingsPage() {
         <div
           className={`max-w-3xl p-3.5 rounded-xl text-xs font-medium border ${
             message.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
           }`}
         >
           {message.text}
@@ -213,9 +213,9 @@ export default function SettingsPage() {
       )}
 
       {/* Content Panel */}
-      <div className="bg-[#141726] border border-[#23263A] rounded-2xl p-6 shadow-lg max-w-3xl">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-xs max-w-3xl transition-colors">
         {loading ? (
-          <div className="flex items-center justify-center py-12 text-[#8E95AF] gap-2 text-sm">
+          <div className="flex items-center justify-center py-12 text-[var(--text-secondary)] gap-2 text-sm">
             <Loader2 className="w-5 h-5 animate-spin text-[#4E75FF]" />
             Loading settings...
           </div>
@@ -223,19 +223,19 @@ export default function SettingsPage() {
           <>
             {activeTab === 'profile' && (
               <form onSubmit={handleSaveProfile} className="space-y-5">
-                <div className="flex items-center gap-4 pb-4 border-b border-[#23263A]">
+                <div className="flex items-center gap-4 pb-4 border-b border-[var(--border-color)]">
                   <div className="w-16 h-16 rounded-full bg-[#4E75FF] flex items-center justify-center text-white font-extrabold text-xl shadow-lg border border-[#5B82FF]/40 uppercase">
                     {userInitials}
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">{name || 'User Profile'}</h3>
-                    <p className="text-xs text-[#8E95AF]">{roleTitle} · Orbitask Workspace</p>
+                    <h3 className="font-bold text-[var(--text-primary)] text-base">{name || 'User Profile'}</h3>
+                    <p className="text-xs text-[var(--text-secondary)]">{roleTitle} · Orbitask Workspace</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       Full Name
                     </label>
                     <input
@@ -243,12 +243,12 @@ export default function SettingsPage() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       Email Address
                     </label>
                     <input
@@ -256,28 +256,28 @@ export default function SettingsPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       Role Title
                     </label>
                     <input
                       type="text"
                       disabled
                       value={roleTitle}
-                      className="w-full bg-[#0B0D1A]/60 border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-[#8E95AF] cursor-not-allowed"
+                      className="w-full bg-[var(--bg-card-hover)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-muted)] cursor-not-allowed"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#23263A] flex justify-end">
+                <div className="pt-4 border-t border-[var(--border-color)] flex justify-end">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50"
+                    className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50 cursor-pointer"
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -294,19 +294,19 @@ export default function SettingsPage() {
 
             {activeTab === 'security' && (
               <form onSubmit={handleSaveSecurity} className="space-y-5">
-                <div className="flex items-center gap-3 pb-4 border-b border-[#23263A]">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                <div className="flex items-center gap-3 pb-4 border-b border-[var(--border-color)]">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
                     <Lock className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">Security & Password</h3>
-                    <p className="text-xs text-[#8E95AF]">Update your password to secure your account</p>
+                    <h3 className="font-bold text-[var(--text-primary)] text-base">Security & Password</h3>
+                    <p className="text-xs text-[var(--text-secondary)]">Update your password to secure your account</p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       Current Password
                     </label>
                     <input
@@ -314,12 +314,12 @@ export default function SettingsPage() {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       New Password
                     </label>
                     <input
@@ -327,12 +327,12 @@ export default function SettingsPage() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-[#8E95AF] mb-1.5 uppercase tracking-wider">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">
                       Confirm New Password
                     </label>
                     <input
@@ -340,16 +340,16 @@ export default function SettingsPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF]"
+                      className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[#5B82FF]"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-[#23263A] flex justify-end">
+                <div className="pt-4 border-t border-[var(--border-color)] flex justify-end">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50"
+                    className="flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-md disabled:opacity-50 cursor-pointer"
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -366,18 +366,18 @@ export default function SettingsPage() {
 
             {activeTab === 'notifications' && (
               <div className="space-y-4 py-2">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-[#0B0D1A] border border-[#23263A]">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)]">
                   <div>
-                    <p className="text-sm font-semibold text-white">Email Notifications</p>
-                    <p className="text-xs text-[#8E95AF]">Receive task assignments and project updates via email</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">Email Notifications</p>
+                    <p className="text-xs text-[var(--text-secondary)]">Receive task assignments and project updates via email</p>
                   </div>
                   <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#4E75FF] cursor-pointer" />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-xl bg-[#0B0D1A] border border-[#23263A]">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)]">
                   <div>
-                    <p className="text-sm font-semibold text-white">In-App Notifications</p>
-                    <p className="text-xs text-[#8E95AF]">Show bell popups for updates in real time</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">In-App Notifications</p>
+                    <p className="text-xs text-[var(--text-secondary)]">Show bell popups for updates in real time</p>
                   </div>
                   <input type="checkbox" defaultChecked className="w-4 h-4 accent-[#4E75FF] cursor-pointer" />
                 </div>
@@ -386,14 +386,14 @@ export default function SettingsPage() {
 
             {activeTab === 'team' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#23263A]">
-                  <h3 className="text-base font-bold text-white">
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">
                     Active Workspace Members ({teamUsers.length})
                   </h3>
-                  <span className="text-xs text-[#8E95AF]">Synced with Database</span>
+                  <span className="text-xs text-[var(--text-secondary)]">Synced with Database</span>
                 </div>
 
-                <div className="divide-y divide-[#23263A]">
+                <div className="divide-y divide-[var(--border-color)]">
                   {teamUsers.map((m, idx) => {
                     const initials = getInitials(m.name);
                     const colorBg = colorPalette[idx % colorPalette.length];
@@ -409,14 +409,14 @@ export default function SettingsPage() {
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="text-xs font-bold text-white">{m.name}</p>
+                              <p className="text-xs font-bold text-[var(--text-primary)]">{m.name}</p>
                               {isSelf && (
                                 <span className="text-[10px] bg-[#4E75FF]/20 text-[#5B82FF] px-1.5 py-0.2 rounded-md font-semibold">
                                   You
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] text-[#8E95AF]">{m.email}</p>
+                            <p className="text-[11px] text-[var(--text-secondary)]">{m.email}</p>
                           </div>
                         </div>
 

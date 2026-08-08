@@ -11,11 +11,11 @@ import {
   getMemberWorkspaceOverview,
 } from "@/lib/actions/member-tasks";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { CheckSquare, Clock, CheckCircle2, FolderKanban, Users } from "lucide-react";
 import { AnalyticsSection } from "@/components/analytics/analytics-section";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
-
 
 type ProjectMember = {
   id: string;
@@ -74,26 +74,24 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-
-
 const priorityBadgeStyle = (p: string) => {
   const styles: Record<string, string> = {
-    LOW: "bg-gray-800/60 text-gray-400 border border-gray-700/50",
-    MEDIUM: "bg-blue-500/15 text-blue-400 border border-blue-500/30",
-    HIGH: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
-    URGENT: "bg-red-500/15 text-red-400 border border-red-500/30",
+    LOW: "bg-slate-100 text-slate-700 border border-slate-300 dark:bg-gray-800/60 dark:text-gray-400 dark:border-gray-700/50",
+    MEDIUM: "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30",
+    HIGH: "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30",
+    URGENT: "bg-rose-100 text-rose-800 border border-rose-300 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30",
   };
-  return styles[p] || "bg-gray-800/60 text-gray-400 border border-gray-700/50";
+  return styles[p] || "bg-slate-100 text-slate-700 border border-slate-300";
 };
 
 const projectStatusStyle = (s: string) => {
   const styles: Record<string, { label: string; style: string }> = {
-    NOT_STARTED: { label: "Not started", style: "bg-gray-800/60 text-gray-400 border-gray-700" },
-    IN_PROGRESS: { label: "On track", style: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
-    ON_HOLD: { label: "At risk", style: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
-    COMPLETED: { label: "Completed", style: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+    NOT_STARTED: { label: "Not started", style: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-gray-800/60 dark:text-gray-400 dark:border-gray-700" },
+    IN_PROGRESS: { label: "On track", style: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30" },
+    ON_HOLD: { label: "At risk", style: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30" },
+    COMPLETED: { label: "Completed", style: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30" },
   };
-  return styles[s] || { label: s, style: "bg-gray-800/60 text-gray-400 border-gray-700" };
+  return styles[s] || { label: s, style: "bg-slate-100 text-slate-700 border-slate-300" };
 };
 
 const colorPalette = [
@@ -183,7 +181,7 @@ export default function MemberDashboard() {
   const completionPercent = stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden transition-colors">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <DashboardGreeting
@@ -194,15 +192,16 @@ export default function MemberDashboard() {
         <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <Link
             href="/tasks"
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/25 transition"
+            className="inline-flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition cursor-pointer"
           >
             <span>+</span>
             <span>View Tasks</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-3">
+            <ThemeToggle />
             <NotificationBell />
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
+            <div className="w-9 h-9 rounded-full bg-[#4E75FF] text-white font-bold text-xs flex items-center justify-center shadow-md uppercase">
               {userInitials}
             </div>
           </div>
@@ -212,64 +211,64 @@ export default function MemberDashboard() {
       {/* 4 Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Tasks */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-gray-400">Total Tasks</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center">
-              <CheckSquare className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Total Tasks</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20 flex items-center justify-center">
+              <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-white">{stats.totalTasks}</span>
-            <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)]">{stats.totalTasks}</span>
+            <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10 px-2 py-0.5 rounded-full">
               {taskScope === "assigned" ? "Assigned" : "Project"}
             </span>
           </div>
         </div>
 
         {/* Pending Tasks */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-gray-400">In Progress</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20 flex items-center justify-center">
-              <Clock className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">In Progress</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/20 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-white">{stats.pendingTasks}</span>
-            <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)]">{stats.pendingTasks}</span>
+            <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 dark:text-amber-400 dark:bg-amber-500/10 px-2 py-0.5 rounded-full">
               Pending
             </span>
           </div>
         </div>
 
         {/* Completed Tasks */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-gray-400">Completed</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Completed</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-white">{stats.completedTasks}</span>
-            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)]">{stats.completedTasks}</span>
+            <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full">
               {completionPercent}% Rate
             </span>
           </div>
         </div>
 
         {/* Active Projects */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-gray-400">Active Projects</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20 flex items-center justify-center">
-              <FolderKanban className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-medium text-[var(--text-secondary)]">Active Projects</span>
+            <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/20 flex items-center justify-center">
+              <FolderKanban className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-white">{stats.totalProjects}</span>
-            <span className="text-[11px] font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)]">{stats.totalProjects}</span>
+            <span className="text-[11px] font-semibold text-purple-800 bg-purple-100 dark:text-purple-400 dark:bg-purple-500/10 px-2 py-0.5 rounded-full">
               Active
             </span>
           </div>
@@ -279,24 +278,24 @@ export default function MemberDashboard() {
       {/* Main Grid: My Active Projects (2 Cols) + Real Recent Activity (1 Col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active Projects List (2 Cols) */}
-        <div className="lg:col-span-2 bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+        <div className="lg:col-span-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 transition-colors">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg font-bold text-white">Active Projects</h2>
-              <p className="text-xs text-gray-400">Projects you are contributing to</p>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">Active Projects</h2>
+              <p className="text-xs text-[var(--text-secondary)]">Projects you are contributing to</p>
             </div>
             <Link
               href="/projects"
-              className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition"
+              className="text-xs font-semibold text-[#5B82FF] hover:underline transition"
             >
               View All →
             </Link>
           </div>
 
           {loading ? (
-            <p className="text-xs text-gray-500 py-6">Loading projects...</p>
+            <p className="text-xs text-[var(--text-muted)] py-6">Loading projects...</p>
           ) : projects.length === 0 ? (
-            <p className="text-xs text-gray-500 py-6 text-center">No projects joined yet.</p>
+            <p className="text-xs text-[var(--text-muted)] py-6 text-center">No projects joined yet.</p>
           ) : (
             <div className="space-y-4">
               {projects.map((project) => {
@@ -306,11 +305,11 @@ export default function MemberDashboard() {
                 const statusInfo = projectStatusStyle(project.status);
 
                 return (
-                  <div key={project.id} className="p-4 rounded-xl bg-[#0B0E17]/60 border border-[#1E253B] space-y-3">
+                  <div key={project.id} className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold text-sm text-white">{project.name}</h3>
-                        <p className="text-[11px] text-gray-500" suppressHydrationWarning>
+                        <h3 className="font-bold text-sm text-[var(--text-primary)]">{project.name}</h3>
+                        <p className="text-[11px] text-[var(--text-secondary)]" suppressHydrationWarning>
                           Manager: {project.manager.name} • Due {mounted ? formatDate(project.endDate) : ""}
                         </p>
                       </div>
@@ -329,7 +328,7 @@ export default function MemberDashboard() {
                                 title={m.user.name}
                                 className={`w-6 h-6 rounded-full ${
                                   colorPalette[idx % colorPalette.length]
-                                } text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#0B0E17] uppercase`}
+                                } text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-card)] uppercase`}
                               >
                                 {getInitials(m.user.name)}
                               </div>
@@ -337,7 +336,7 @@ export default function MemberDashboard() {
                           ) : (
                             <div
                               title={project.manager.name}
-                              className="w-6 h-6 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#0B0E17] uppercase"
+                              className="w-6 h-6 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[var(--bg-card)] uppercase"
                             >
                               {getInitials(project.manager.name)}
                             </div>
@@ -348,13 +347,13 @@ export default function MemberDashboard() {
 
                     {/* Progress Bar */}
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-[#181F33] rounded-full h-1.5 overflow-hidden">
+                      <div className="flex-1 bg-[var(--border-color)] rounded-full h-1.5 overflow-hidden">
                         <div
-                          className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                          className="bg-[#4E75FF] h-full rounded-full transition-all duration-500"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
-                      <span className="text-[11px] font-bold text-gray-400 min-w-[32px] text-right">
+                      <span className="text-[11px] font-bold text-[var(--text-secondary)] min-w-[32px] text-right">
                         {progress}%
                       </span>
                     </div>
@@ -366,14 +365,14 @@ export default function MemberDashboard() {
         </div>
 
         {/* Real Workspace Recent Activity (1 Col) */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6 flex flex-col justify-between">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 flex flex-col justify-between transition-colors">
           <div>
-            <h2 className="text-lg font-bold text-white mb-1">Workspace Activity</h2>
-            <p className="text-xs text-gray-400 mb-5">Latest updates from database</p>
+            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-1">Workspace Activity</h2>
+            <p className="text-xs text-[var(--text-secondary)] mb-5">Latest updates from database</p>
 
             <div className="space-y-4">
               {overview.recentTasks.length === 0 && overview.recentUsers.length === 0 ? (
-                <p className="text-xs text-gray-500 py-4">No recent activity logged.</p>
+                <p className="text-xs text-[var(--text-muted)] py-4">No recent activity logged.</p>
               ) : (
                 overview.recentTasks.map((t, idx) => {
                   const initials = getInitials(t.creator.name);
@@ -381,17 +380,17 @@ export default function MemberDashboard() {
                   return (
                     <div key={t.id} className="flex items-start gap-3 text-xs">
                       <div
-                        className={`w-7 h-7 rounded-full ${color} text-white font-bold flex items-center justify-center shrink-0 text-[10px] uppercase`}
+                        className={`w-7 h-7 rounded-full ${color} text-white font-bold flex items-center justify-center shrink-0 text-[10px] uppercase shadow-xs`}
                       >
                         {initials}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-300 leading-snug">
-                          <span className="font-semibold text-white">{t.creator.name}</span> updated task{" "}
+                        <p className="text-[var(--text-secondary)] leading-snug">
+                          <span className="font-semibold text-[var(--text-primary)]">{t.creator.name}</span> updated task{" "}
                           <span className="font-semibold text-[#5B82FF]">{t.title}</span> in{" "}
-                          <span className="text-gray-400">#{t.project.name}</span>
+                          <span className="text-[var(--text-secondary)]">#{t.project.name}</span>
                         </p>
-                        <p className="text-[10px] text-gray-500 mt-0.5">Status: {t.status}</p>
+                        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Status: {t.status}</p>
                       </div>
                     </div>
                   );
@@ -405,18 +404,18 @@ export default function MemberDashboard() {
       {/* Bottom Section: My Tasks Checklist & Workspace Banner */}
       <div className="space-y-6">
         {/* My Tasks Card */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 transition-colors">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg font-bold text-white">My Tasks</h2>
-              <p className="text-xs text-gray-400">Tasks assigned to you</p>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">My Tasks</h2>
+              <p className="text-xs text-[var(--text-secondary)]">Tasks assigned to you</p>
             </div>
 
             <div className="flex items-center gap-3">
               <select
                 value={taskScope}
                 onChange={(e) => setTaskScope(e.target.value as "assigned" | "all_project_tasks")}
-                className="bg-[#0B0E17] border border-[#22293F] text-xs text-gray-300 rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer"
+                className="bg-[var(--bg-input)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#5B82FF] cursor-pointer"
               >
                 <option value="assigned">Assigned to Me</option>
                 <option value="all_project_tasks">All Project Tasks</option>
@@ -425,26 +424,26 @@ export default function MemberDashboard() {
           </div>
 
           {loading ? (
-            <p className="text-xs text-gray-500 py-6">Loading tasks...</p>
+            <p className="text-xs text-[var(--text-muted)] py-6">Loading tasks...</p>
           ) : tasks.length === 0 ? (
-            <p className="text-xs text-gray-500 py-6 text-center">No tasks assigned yet.</p>
+            <p className="text-xs text-[var(--text-muted)] py-6 text-center">No tasks assigned yet.</p>
           ) : (
-            <div className="divide-y divide-[#1E253B]">
+            <div className="divide-y divide-[var(--border-color)]">
               {tasks.map((task) => {
                 const isCompleted = task.status === "COMPLETED";
                 return (
                   <div
                     key={task.id}
-                    className="py-3.5 flex items-center justify-between gap-4 group hover:bg-[#0B0E17]/40 px-2 rounded-xl transition"
+                    className="py-3.5 flex items-center justify-between gap-4 group hover:bg-[var(--bg-card-hover)] px-2 rounded-xl transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <button
                         onClick={() => handleStatusChange(task.id, task.status)}
                         disabled={updatingId === task.id}
-                        className={`w-5 h-5 rounded-md border flex items-center justify-center transition shrink-0 ${
+                        className={`w-5 h-5 rounded-md border flex items-center justify-center transition shrink-0 cursor-pointer ${
                           isCompleted
-                            ? "bg-blue-600 border-blue-500 text-white"
-                            : "border-[#303B5C] hover:border-blue-500 text-transparent"
+                            ? "bg-[#4E75FF] border-[#4E75FF] text-white"
+                            : "border-[var(--border-color)] hover:border-[#5B82FF] text-transparent bg-[var(--bg-input)]"
                         }`}
                       >
                         ✓
@@ -453,18 +452,18 @@ export default function MemberDashboard() {
                         <Link
                           href={`/tasks/${task.id}`}
                           className={`text-sm font-semibold block truncate ${
-                            isCompleted ? "line-through text-gray-500" : "text-white hover:text-blue-400"
+                            isCompleted ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)] hover:text-[#5B82FF]"
                           }`}
                         >
                           {task.title}
                         </Link>
-                        <p className="text-[11px] text-gray-500 truncate">{task.project.name}</p>
+                        <p className="text-[11px] text-[var(--text-secondary)] truncate">{task.project.name}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-gray-400 hidden sm:inline flex items-center gap-1" suppressHydrationWarning>
-                        <Clock className="w-3.5 h-3.5" />
+                      <span className="text-xs text-[var(--text-secondary)] hidden sm:flex items-center gap-1" suppressHydrationWarning>
+                        <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                         <span>{mounted ? formatDate(task.dueDate) : ""}</span>
                       </span>
 
@@ -480,14 +479,14 @@ export default function MemberDashboard() {
         </div>
 
         {/* Real Dynamic Team Workspace Banner */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6 flex items-center justify-between gap-4">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 flex items-center justify-between gap-4 transition-colors">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#4E75FF]/15 border border-[#5B82FF]/30 text-[#5B82FF] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(78,117,255,0.2)]">
+            <div className="w-12 h-12 rounded-2xl bg-[#4E75FF]/15 border border-[#5B82FF]/30 text-[#5B82FF] flex items-center justify-center shrink-0 shadow-xs">
               <Users className="w-6 h-6 text-[#5B82FF]" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-white">Team Workspace</h3>
-              <p className="text-xs text-gray-400">
+              <h3 className="font-bold text-base text-[var(--text-primary)]">Team Workspace</h3>
+              <p className="text-xs text-[var(--text-secondary)]">
                 {overview.totalWorkspaceUsers || 1} active members · {stats.totalProjects} active shared projects
               </p>
             </div>
@@ -495,7 +494,7 @@ export default function MemberDashboard() {
 
           <Link
             href="/messages"
-            className="px-4 py-2.5 bg-[#1C2337] border border-[#2D3754] text-white text-xs font-semibold rounded-xl hover:bg-[#252E47] transition shrink-0"
+            className="px-4 py-2.5 bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs font-semibold rounded-xl hover:bg-[#4E75FF] hover:text-white transition shrink-0"
           >
             Workspace Chat
           </Link>

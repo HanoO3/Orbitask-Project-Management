@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-:root {
-  /* Orbitask Reference Color Palette */
+:root,
+html.dark {
+  /* Orbitask Dark Color Palette */
   --bg-main: #0B0D1A;
   --bg-sidebar: #090B17;
   --bg-card: #141726;
@@ -10,6 +11,18 @@
   --border-color: #23263A;
   --border-subtle: #1C1F33;
   
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E95AF;
+  --text-muted: #626A86;
+
+  /* Legacy variable mapping */
+  --text-white: #FFFFFF;
+  --text-gray: #8E95AF;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(20, 23, 38, 0.75);
+
   /* Accent Colors */
   --primary-blue: #5B82FF;
   --primary-active: #4E75FF;
@@ -25,59 +38,58 @@
   --status-blue: #3B82F6;
   --status-blue-bg: rgba(59, 130, 246, 0.12);
   --status-purple: #8B5CF6;
-  
-  /* Text */
-  --text-white: #FFFFFF;
-  --text-gray: #8E95AF;
-  --text-muted: #626A86;
 }
 
 html.light {
+  /* Orbitask Light Color Palette */
   --bg-main: #F4F6FB;
   --bg-sidebar: #FFFFFF;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F0F4FF;
+  --bg-card-hover: #F8FAFC;
   --bg-input: #F8FAFC;
   --border-color: #E2E8F0;
-  --border-subtle: #CBD5E1;
+  --border-subtle: #F1F5F9;
   
+  /* Text */
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* Legacy variable mapping */
   --text-white: #0F172A;
   --text-gray: #475569;
-  --text-muted: #64748B;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+
+  /* Accent Colors */
+  --primary-blue: #5B82FF;
+  --primary-active: #4E75FF;
+  --primary-glow: rgba(91, 130, 255, 0.15);
+
+  /* Status Colors */
+  --status-green: #16A34A;
+  --status-green-bg: #DCFCE7;
+  --status-yellow: #CA8A04;
+  --status-yellow-bg: #FEF9C3;
+  --status-red: #DC2626;
+  --status-red-bg: #FEE2E2;
+  --status-blue: #2563EB;
+  --status-blue-bg: #DBEAFE;
+  --status-purple: #7C3AED;
 }
 
-html.light body {
-  background-color: #F4F6FB !important;
-  color: #0F172A !important;
-}
-
-html.light div.bg-\[\#0B0D1A\],
-html.light div.bg-\[\#090B17\],
-html.light header.bg-\[\#0B0D1A\]\/90 {
-  background-color: #F8FAFC !important;
-  border-color: #E2E8F0 !important;
-}
-
-html.light div.bg-\[\#141726\] {
-  background-color: #FFFFFF !important;
-  border-color: #E2E8F0 !important;
-  color: #0F172A !important;
-}
-
-html.light .text-white {
-  color: #0F172A !important;
-}
-
-html.light .text-\[\#8E95AF\] {
-  color: #475569 !important;
-}
-
-html.light .text-\[\#626A86\] {
-  color: #64748B !important;
-}
-
-html.light .border-\[\#23263A\] {
-  border-color: #E2E8F0 !important;
+@theme {
+  --color-bg-main: var(--bg-main);
+  --color-bg-sidebar: var(--bg-sidebar);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-hover: var(--bg-card-hover);
+  --color-bg-input: var(--bg-input);
+  --color-border-main: var(--border-color);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-main: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
 }
 
 @layer base {
@@ -86,10 +98,11 @@ html.light .border-\[\#23263A\] {
   }
   body {
     background-color: var(--bg-main);
-    color: var(--text-white);
+    color: var(--text-primary);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
@@ -102,7 +115,7 @@ html.light .border-\[\#23263A\] {
   background: var(--bg-main);
 }
 ::-webkit-scrollbar-thumb {
-  background: #23263A;
+  background: var(--border-color);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -119,7 +132,7 @@ html.light .border-\[\#23263A\] {
 }
 
 .glass-panel {
-  background: rgba(20, 23, 38, 0.75);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
 }

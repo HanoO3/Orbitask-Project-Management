@@ -50,26 +50,26 @@ export function Sidebar() {
 
   const roleBadge = (r?: string) => {
     const styles: Record<string, string> = {
-      ADMIN: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-      PROJECT_MANAGER: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-      TEAM_MEMBER: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+      ADMIN: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/30',
+      PROJECT_MANAGER: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/30',
+      TEAM_MEMBER: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30',
     };
-    return styles[r || ''] || 'bg-gray-500/15 text-gray-300 border-gray-500/30';
+    return styles[r || ''] || 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-gray-500/15 dark:text-gray-300 dark:border-gray-500/30';
   };
 
   return (
     <>
       {/* Mobile Header Bar */}
-      <header className="lg:hidden bg-[#090B17] border-b border-[#23263A] px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-md">
+      <header className="lg:hidden bg-[var(--bg-sidebar)] border-b border-[var(--border-color)] px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm transition-colors">
         <OrbitaskLogo size="md" />
         <div className="flex items-center gap-2">
           <NotificationBell />
           <button
             onClick={toggleMobileNav}
             aria-label="Toggle navigation"
-            className="p-2 rounded-xl text-gray-300 hover:bg-[#141726]"
+            className="p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)] transition-colors"
           >
-            {mobileOpen ? <X className="w-6 h-6 text-[#5B82FF]" /> : <Menu className="w-6 h-6 text-white" />}
+            {mobileOpen ? <X className="w-6 h-6 text-[#5B82FF]" /> : <Menu className="w-6 h-6 text-[var(--text-primary)]" />}
           </button>
         </div>
       </header>
@@ -78,23 +78,23 @@ export function Sidebar() {
       {mobileOpen && (
         <div
           onClick={closeMobileNav}
-          className="lg:hidden fixed inset-0 bg-black/70 z-40 backdrop-blur-xs"
+          className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-xs"
         />
       )}
 
       {/* Sidebar Drawer Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 max-w-[80vw] bg-[#090B17] border-r border-[#23263A] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 max-w-[80vw] bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] flex flex-col justify-between transition-all duration-300 ease-in-out lg:translate-x-0 ${
+          mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
         <div>
           {/* Top Header Logo */}
-          <div className="h-20 px-6 border-b border-[#23263A] flex items-center justify-between">
+          <div className="h-20 px-6 border-b border-[var(--border-color)] flex items-center justify-between">
             <OrbitaskLogo size="md" />
             <button
               onClick={closeMobileNav}
-              className="lg:hidden text-gray-400 hover:text-white p-1"
+              className="lg:hidden text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 transition-colors"
             >
               <X className="w-5 h-5 text-[#5B82FF]" />
             </button>
@@ -103,13 +103,13 @@ export function Sidebar() {
           {/* Sidebar Search Input */}
           <div className="p-4 pb-2">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#121524] border border-[#23263A] text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-[#5B82FF] placeholder-[#626A86] transition"
+                className="w-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-[#5B82FF] placeholder-[var(--text-muted)] transition-all"
               />
             </div>
           </div>
@@ -128,10 +128,10 @@ export function Sidebar() {
                   className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     active
                       ? 'bg-[#4E75FF] text-white shadow-[0_4px_14px_rgba(78,117,255,0.4)] font-semibold'
-                      : 'text-[#8E95AF] hover:bg-[#141726] hover:text-white'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-[#8E95AF]'}`} />
+                  <Icon className={`w-5 h-5 ${active ? 'text-white' : 'text-[var(--text-secondary)]'}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -140,21 +140,21 @@ export function Sidebar() {
         </div>
 
         {/* Footer Settings & User Card */}
-        <div className="p-4 border-t border-[#23263A] space-y-3 bg-[#090B17]">
+        <div className="p-4 border-t border-[var(--border-color)] space-y-3 bg-[var(--bg-sidebar)] transition-colors">
           <Link
             href="/settings"
             onClick={closeMobileNav}
             className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               pathname.startsWith('/settings') || pathname === '/profile'
                 ? 'bg-[#4E75FF] text-white shadow-[0_4px_14px_rgba(78,117,255,0.4)]'
-                : 'text-[#8E95AF] hover:bg-[#141726] hover:text-white'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Settings className="w-5 h-5 text-[#8E95AF]" />
+            <Settings className="w-5 h-5 text-[var(--text-secondary)]" />
             <span>Settings</span>
           </Link>
 
-          <div className="pt-3 border-t border-[#23263A] flex items-center justify-between">
+          <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-full bg-[#4E75FF] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-md">
                 {session?.user?.name
@@ -167,8 +167,8 @@ export function Sidebar() {
                   : 'JD'}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-white truncate">
-                  {session?.user?.name || 'James'}
+                <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                  {session?.user?.name || 'User'}
                 </p>
                 <span
                   className={`inline-block px-1.5 py-0.2 rounded-full text-[9px] font-semibold border ${roleBadge(

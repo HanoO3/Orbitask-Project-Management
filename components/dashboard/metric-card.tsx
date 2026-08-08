@@ -43,11 +43,11 @@ export const MetricCard: React.FC<MetricProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.08 }}
       whileHover={{ y: -3, transition: { duration: 0.2 } }}
-      className="bg-[#141726] border border-[#23263A] hover:border-[#333754] rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all"
+      className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#5B82FF]/40 rounded-2xl p-5 shadow-xs flex flex-col justify-between transition-all"
     >
       <div className="flex items-center justify-between mb-4">
-        {/* Rounded dark blue icon box */}
-        <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shadow-inner">
+        {/* Rounded icon box */}
+        <div className="w-10 h-10 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] flex items-center justify-center shadow-xs transition-colors">
           {getIcon()}
         </div>
 
@@ -55,10 +55,10 @@ export const MetricCard: React.FC<MetricProps> = ({
         <div
           className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full ${
             isPositive
-              ? 'text-emerald-400 bg-emerald-500/10'
+              ? 'text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/15'
               : isNegative
-              ? 'text-rose-400 bg-rose-500/10'
-              : 'text-gray-400 bg-gray-500/10'
+              ? 'text-rose-700 bg-rose-100 dark:text-rose-400 dark:bg-rose-500/15'
+              : 'text-slate-700 bg-slate-100 dark:text-gray-400 dark:bg-gray-500/15'
           }`}
         >
           <span>{change}</span>
@@ -68,10 +68,10 @@ export const MetricCard: React.FC<MetricProps> = ({
       </div>
 
       <div>
-        <div className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-1">
+        <div className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight mb-1">
           {value}
         </div>
-        <div className="text-xs font-medium text-[#8E95AF]">
+        <div className="text-xs font-medium text-[var(--text-secondary)]">
           {title}
         </div>
       </div>

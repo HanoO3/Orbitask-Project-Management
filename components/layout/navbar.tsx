@@ -32,10 +32,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Desktop Top Navbar Header (lg and above) */}
-      <header className="hidden lg:flex sticky top-0 z-20 bg-[#0B0D1A]/90 backdrop-blur-md border-b border-[#23263A] px-8 py-3.5 items-center justify-between w-full max-w-full">
+      <header className="hidden lg:flex sticky top-0 z-20 bg-[var(--bg-main)]/90 backdrop-blur-md border-b border-[var(--border-color)] px-8 py-3.5 items-center justify-between w-full max-w-full transition-colors">
         {/* Left side: Page Title */}
         <div className="flex items-center gap-4 min-w-0">
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
             {title}
           </h1>
         </div>
@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {onOpenNewTaskModal && (
             <button
               onClick={onOpenNewTaskModal}
-              className="flex items-center gap-1.5 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-[0_4px_12px_rgba(78,117,255,0.3)] hover:shadow-[0_6px_16px_rgba(78,117,255,0.4)] transition-all active:scale-95"
+              className="flex items-center gap-1.5 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-[0_4px_12px_rgba(78,117,255,0.3)] hover:shadow-[0_6px_16px_rgba(78,117,255,0.4)] transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Task</span>
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-[#4E75FF] text-white font-bold text-xs shadow-md border border-[#5B82FF]/40 hover:ring-2 hover:ring-[#5B82FF]/60 transition-all uppercase"
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-[#4E75FF] text-white font-bold text-xs shadow-md border border-[#5B82FF]/40 hover:ring-2 hover:ring-[#5B82FF]/60 transition-all uppercase cursor-pointer"
               aria-label="User Profile"
             >
               {userInitials}
@@ -77,16 +77,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-56 bg-[#141726] border border-[#23263A] rounded-xl shadow-2xl p-2 z-50 text-sm"
+                  className="absolute right-0 mt-2 w-56 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl p-2 z-50 text-sm"
                 >
-                  <div className="px-3 py-2 border-b border-[#23263A] mb-1">
-                    <p className="font-semibold text-white truncate">{userName}</p>
-                    <p className="text-xs text-[#8E95AF] truncate">{userEmail}</p>
+                  <div className="px-3 py-2 border-b border-[var(--border-color)] mb-1">
+                    <p className="font-semibold text-[var(--text-primary)] truncate">{userName}</p>
+                    <p className="text-xs text-[var(--text-secondary)] truncate">{userEmail}</p>
                   </div>
                   <Link
                     href="/settings"
                     onClick={() => setShowProfileMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[#8E95AF] hover:text-white hover:bg-[#1D2236] transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors"
                   >
                     <User className="w-4 h-4" />
                     Profile Settings
@@ -96,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setShowProfileMenu(false);
                       signOut({ callbackUrl: '/login' });
                     }}
-                    className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -109,8 +109,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       </header>
 
       {/* Mobile Page Header (lg:hidden) - Inline Title & Primary Action only */}
-      <div className="lg:hidden px-4 py-3 bg-[#0B0D1A] border-b border-[#23263A]/60 flex items-center justify-between w-full max-w-full">
-        <h1 className="text-xl font-bold text-white tracking-tight">
+      <div className="lg:hidden px-4 py-3 bg-[var(--bg-main)] border-b border-[var(--border-color)] flex items-center justify-between w-full max-w-full transition-colors">
+        <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
           {title}
         </h1>
         <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {onOpenNewTaskModal && (
             <button
               onClick={onOpenNewTaskModal}
-              className="flex items-center gap-1 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3 py-1.5 rounded-lg font-medium text-xs shadow-md transition-all active:scale-95"
+              className="flex items-center gap-1 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3 py-1.5 rounded-lg font-medium text-xs shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Task</span>
