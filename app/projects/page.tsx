@@ -133,24 +133,24 @@ export default function ProjectsPage() {
         </div>
 
         {/* Search & Filter */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search projects..."
-              className="bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
+              className="w-full sm:w-48 bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
             />
           </div>
 
-          <div className="flex bg-[#141726] border border-[#23263A] rounded-xl p-1 text-xs">
+          <div className="flex flex-wrap bg-[#141726] border border-[#23263A] rounded-xl p-1 text-xs max-w-full overflow-x-auto">
             {['All', 'On track', 'At risk', 'Delayed', 'Completed'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                className={`px-2.5 sm:px-3 py-1 rounded-lg font-medium transition-colors ${
                   filterStatus === status
                     ? 'bg-[#4E75FF] text-white shadow-sm'
                     : 'text-[#8E95AF] hover:text-white'

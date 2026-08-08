@@ -18,11 +18,12 @@ import {
 import { OrbitaskLogo } from '@/components/logo';
 import { NotificationBell } from '@/components/notification-bell';
 import { LogoutButton } from '@/components/logout-button';
+import { useMobileNav } from '@/components/app-layout';
 
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { mobileOpen, toggleMobileNav, closeMobileNav } = useMobileNav();
   const [searchQuery, setSearchQuery] = useState('');
 
   const role = session?.user?.role;
@@ -64,7 +65,7 @@ export function Sidebar() {
         <div className="flex items-center gap-2">
           <NotificationBell />
           <button
-            onClick={() => setMobileOpen((o) => !o)}
+            onClick={toggleMobileNav}
             aria-label="Toggle navigation"
             className="p-2 rounded-xl text-gray-300 hover:bg-[#141726]"
           >
@@ -76,14 +77,14 @@ export function Sidebar() {
       {/* Mobile Menu Backdrop */}
       {mobileOpen && (
         <div
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileNav}
           className="lg:hidden fixed inset-0 bg-black/70 z-40 backdrop-blur-xs"
         />
       )}
 
       {/* Sidebar Drawer Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#090B17] border-r border-[#23263A] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 max-w-[80vw] bg-[#090B17] border-r border-[#23263A] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -92,7 +93,7 @@ export function Sidebar() {
           <div className="h-20 px-6 border-b border-[#23263A] flex items-center justify-between">
             <OrbitaskLogo size="md" />
             <button
-              onClick={() => setMobileOpen(false)}
+              onClick={closeMobileNav}
               className="lg:hidden text-gray-400 hover:text-white p-1"
             >
               <X className="w-5 h-5 text-[#5B82FF]" />
@@ -123,7 +124,7 @@ export function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={closeMobileNav}
                   className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     active
                       ? 'bg-[#4E75FF] text-white shadow-[0_4px_14px_rgba(78,117,255,0.4)] font-semibold'
@@ -142,7 +143,7 @@ export function Sidebar() {
         <div className="p-4 border-t border-[#23263A] space-y-3 bg-[#090B17]">
           <Link
             href="/settings"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileNav}
             className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
               pathname.startsWith('/settings') || pathname === '/profile'
                 ? 'bg-[#4E75FF] text-white shadow-[0_4px_14px_rgba(78,117,255,0.4)]'

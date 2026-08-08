@@ -161,7 +161,7 @@ export default function TasksPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto max-w-full scrollbar-none">
         {['All', 'In Progress', 'Overdue', 'Completed'].map((tab) => (
           <button
             key={tab}

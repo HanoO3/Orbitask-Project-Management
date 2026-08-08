@@ -163,6 +163,8 @@ export default function MessagesPage() {
     }
   }, [currentUserId, getChannelKey]);
 
+  const [mobileChatView, setMobileChatView] = useState(false);
+
   // Initial load and polling every 4 seconds for real-time updates
   useEffect(() => {
     const t = setTimeout(() => {
@@ -205,7 +207,7 @@ export default function MessagesPage() {
     <DashboardLayout title="Messages">
       <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[520px] grid grid-cols-1 md:grid-cols-4">
         {/* Left Channels & DM List */}
-        <div className="md:col-span-1 border-r border-[#23263A] bg-[#090B17] p-4 flex flex-col justify-between overflow-y-auto">
+        <div className={`md:col-span-1 border-r border-[#23263A] bg-[#090B17] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           <div>
             <h3 className="font-bold text-white text-xs uppercase tracking-wider mb-3 text-[#8E95AF]">
               Workspace Channels
@@ -219,7 +221,10 @@ export default function MessagesPage() {
             ) : (
               <div className="space-y-1 mb-6">
                 <button
-                  onClick={() => setActiveChannel({ id: 'general', name: 'general', type: 'channel' })}
+                  onClick={() => {
+                    setActiveChannel({ id: 'general', name: 'general', type: 'channel' });
+                    setMobileChatView(true);
+                  }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                     activeChannel.name === 'general' && activeChannel.type === 'channel'
                       ? 'bg-[#4E75FF] text-white shadow-md'
@@ -233,7 +238,10 @@ export default function MessagesPage() {
                 {projects.map((proj) => (
                   <button
                     key={proj.id}
-                    onClick={() => setActiveChannel({ id: proj.id, name: proj.name, type: 'channel' })}
+                    onClick={() => {
+                      setActiveChannel({ id: proj.id, name: proj.name, type: 'channel' });
+                      setMobileChatView(true);
+                    }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all truncate ${
                       activeChannel.name === proj.name && activeChannel.type === 'channel'
                         ? 'bg-[#4E75FF] text-white shadow-md'
@@ -265,13 +273,14 @@ export default function MessagesPage() {
                     return (
                       <div
                         key={member.id}
-                        onClick={() =>
+                        onClick={() => {
                           setActiveChannel({
                             id: member.id,
                             name: member.name,
                             type: 'dm',
-                          })
-                        }
+                          });
+                          setMobileChatView(true);
+                        }}
                         className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
                           isSelected ? 'bg-[#1D2236] border border-[#5B82FF]/40' : 'hover:bg-[#141726]'
                         }`}
@@ -294,16 +303,22 @@ export default function MessagesPage() {
         </div>
 
         {/* Right Active Chat View */}
-        <div className="md:col-span-3 flex flex-col justify-between bg-[#141726]">
+        <div className={`md:col-span-3 flex-col justify-between bg-[#141726] ${!mobileChatView ? 'hidden md:flex' : 'flex'}`}>
           {/* Chat Header */}
           <div className="p-4 border-b border-[#23263A] flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                onClick={() => setMobileChatView(false)}
+                className="md:hidden text-[#8E95AF] hover:text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[#090B17] border border-[#23263A] shrink-0 mr-1"
+              >
+                ← Channels
+              </button>
               {activeChannel.type === 'channel' ? (
-                <Hash className="w-5 h-5 text-[#5B82FF]" />
+                <Hash className="w-5 h-5 text-[#5B82FF] shrink-0" />
               ) : (
-                <MessageSquare className="w-5 h-5 text-[#5B82FF]" />
+                <MessageSquare className="w-5 h-5 text-[#5B82FF] shrink-0" />
               )}
-              <h3 className="font-bold text-white text-base">
+              <h3 className="font-bold text-white text-sm sm:text-base truncate">
                 {activeChannel.type === 'channel' ? `#${activeChannel.name}` : activeChannel.name}
               </h3>
             </div>

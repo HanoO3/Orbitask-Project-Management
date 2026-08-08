@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { Menu, Plus, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationBell } from '@/components/notification-bell';
+import { useMobileNav } from '@/components/app-layout';
 
 interface NavbarProps {
   title?: string;
@@ -19,6 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewTaskModal,
 }) => {
   const { data: session } = useSession();
+  const { toggleMobileNav } = useMobileNav();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const userName = session?.user?.name || 'User';
@@ -31,15 +33,15 @@ export const Navbar: React.FC<NavbarProps> = ({
     .slice(0, 2) || 'U';
 
   return (
-    <header className="sticky top-0 z-20 bg-[#0B0D1A]/90 backdrop-blur-md border-b border-[#23263A] px-4 md:px-8 py-3.5 flex items-center justify-between">
+    <header className="sticky top-0 z-20 bg-[#0B0D1A]/90 backdrop-blur-md border-b border-[#23263A] px-4 md:px-8 py-3.5 flex items-center justify-between w-full max-w-full overflow-x-hidden">
       {/* Left side: Mobile Toggle & Page Title */}
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-3 md:gap-4 min-w-0">
         <button
-          onClick={onOpenMobileMenu}
-          className="md:hidden text-[#8E95AF] hover:text-white p-1.5 rounded-lg hover:bg-[#141726] transition-colors"
+          onClick={onOpenMobileMenu || toggleMobileNav}
+          className="lg:hidden text-[#8E95AF] hover:text-white p-1.5 rounded-lg hover:bg-[#141726] transition-colors shrink-0"
           aria-label="Open Menu"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-6 h-6 text-white" />
         </button>
 
         <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">

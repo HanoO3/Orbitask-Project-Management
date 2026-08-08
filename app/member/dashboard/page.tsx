@@ -181,15 +181,15 @@ export default function MemberDashboard() {
   const completionPercent = stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <DashboardGreeting
           userName={userName}
           subtitle="Here's what's happening with your projects today."
         />
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <Link
             href="/tasks"
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-blue-600/25 transition"
@@ -207,9 +207,9 @@ export default function MemberDashboard() {
       </div>
 
       {/* 4 Top Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Tasks */}
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#303B5C] transition">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-medium text-gray-400">Total Tasks</span>
             <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center">

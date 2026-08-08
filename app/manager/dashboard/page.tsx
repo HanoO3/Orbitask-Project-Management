@@ -63,15 +63,15 @@ export default function ManagerDashboard() {
   const userName = session?.user?.name ? session.user.name.split(" ")[0] : "Manager";
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <DashboardGreeting
           userName={userName}
           subtitle="Track and manage your team's assigned projects"
         />
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <NotificationBell />
           <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
             {session?.user?.name
@@ -87,27 +87,27 @@ export default function ManagerDashboard() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Total Projects</p>
-          <p className="text-3xl font-extrabold text-white mt-2">{stats.totalProjects}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">{stats.totalProjects}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Active Projects</p>
-          <p className="text-3xl font-extrabold text-blue-400 mt-2">{stats.activeProjects}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-blue-400 mt-1.5">{stats.activeProjects}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Pending Tasks</p>
-          <p className="text-3xl font-extrabold text-amber-400 mt-2">{stats.pendingTasks}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1.5">{stats.pendingTasks}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Completed Tasks</p>
-          <p className="text-3xl font-extrabold text-emerald-400 mt-2">{stats.completedTasks}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1.5">{stats.completedTasks}</p>
         </div>
       </div>
 
       {/* Projects List */}
-      <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-6">
+      <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-6">
         <h2 className="text-lg font-bold text-white mb-4">My Assigned Projects</h2>
 
         {loading ? (

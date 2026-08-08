@@ -164,9 +164,9 @@ export default function CalendarPage() {
       {/* Grid Container */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Calendar Month Grid (3 cols on desktop) */}
-        <div className="lg:col-span-3 bg-[#141726] border border-[#23263A] rounded-2xl p-5 shadow-lg">
+        <div className="lg:col-span-3 bg-[#141726] border border-[#23263A] rounded-2xl p-3 sm:p-5 shadow-lg overflow-hidden">
           {/* Days Header */}
-          <div className="grid grid-cols-7 text-center text-xs font-semibold text-[#8E95AF] pb-3 border-b border-[#23263A]">
+          <div className="grid grid-cols-7 text-center text-[10px] sm:text-xs font-semibold text-[#8E95AF] pb-3 border-b border-[#23263A]">
             <span>SUN</span>
             <span>MON</span>
             <span>TUE</span>
@@ -182,10 +182,10 @@ export default function CalendarPage() {
               <span>Loading calendar deliverables...</span>
             </div>
           ) : (
-            <div className="grid grid-cols-7 gap-1 md:gap-2 mt-3">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mt-3">
               {/* Blank leading slots for month start alignment */}
               {leadingPadding.map((_, i) => (
-                <div key={`pad-${i}`} className="h-20 md:h-24 rounded-xl p-1 bg-transparent" />
+                <div key={`pad-${i}`} className="h-14 sm:h-20 md:h-24 rounded-xl p-1 bg-transparent" />
               ))}
 
               {calendarDays.map((day) => {
@@ -209,7 +209,7 @@ export default function CalendarPage() {
                     key={day}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setSelectedDate(cellDate)}
-                    className={`h-20 md:h-24 rounded-xl p-2 border transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
+                    className={`h-14 sm:h-20 md:h-24 rounded-xl p-1 sm:p-2 border transition-all cursor-pointer flex flex-col justify-between overflow-hidden ${
                       isSelected
                         ? 'bg-[#1E2540] border-[#5B82FF] shadow-[0_0_12px_rgba(91,130,255,0.3)]'
                         : isToday

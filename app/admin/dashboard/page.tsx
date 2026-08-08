@@ -27,15 +27,15 @@ export default async function AdminDashboard() {
     : "AD";
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <DashboardGreeting
           userName={userName}
           subtitle="System administration & platform control center"
         />
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <NotificationBell />
           <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-600/30 uppercase">
             {userInitials}
@@ -44,26 +44,26 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Total Users</p>
-          <p className="text-3xl font-extrabold text-white mt-2">{totalUsers}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">{totalUsers}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Projects</p>
-          <p className="text-3xl font-extrabold text-blue-400 mt-2">{totalProjects}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-blue-400 mt-1.5">{totalProjects}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Total Tasks</p>
-          <p className="text-3xl font-extrabold text-purple-400 mt-2">{totalTasks}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-purple-400 mt-1.5">{totalTasks}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5">
           <p className="text-xs font-medium text-gray-400">Managers</p>
-          <p className="text-3xl font-extrabold text-indigo-400 mt-2">{managersCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1.5">{managersCount}</p>
         </div>
-        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-5">
+        <div className="bg-[#131725] border border-[#22293F] rounded-2xl p-4 sm:p-5 col-span-2 sm:col-span-1">
           <p className="text-xs font-medium text-gray-400">Team Members</p>
-          <p className="text-3xl font-extrabold text-emerald-400 mt-2">{membersCount}</p>
+          <p className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1.5">{membersCount}</p>
         </div>
       </div>
 

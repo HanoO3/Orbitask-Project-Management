@@ -171,7 +171,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#23263A] pb-3 overflow-x-auto max-w-full scrollbar-none">
         {[
           { id: 'profile', label: 'Profile', icon: User },
           { id: 'security', label: 'Security', icon: Shield },

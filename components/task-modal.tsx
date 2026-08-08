@@ -100,7 +100,7 @@ export function TaskModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-      <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden text-white">
+      <div className="bg-[#141726] border border-[#23263A] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto text-white">
         <div className="flex justify-between items-center px-6 py-4 border-b border-[#23263A]">
           <h2 className="text-base font-bold text-white">
             {editingTask ? 'Edit Task' : 'Create New Task'}

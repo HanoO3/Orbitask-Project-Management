@@ -67,10 +67,10 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0E17] text-white p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[#0B0E17] text-white p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">User Management</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">User Management</h1>
           <p className="text-gray-400 text-xs mt-1">Manage system user accounts and roles</p>
         </div>
         <button
@@ -78,13 +78,13 @@ export default function UsersPage() {
             setEditingUser(null);
             setModalOpen(true);
           }}
-          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-xl text-xs hover:bg-blue-500 shadow-lg shadow-blue-600/25 transition"
+          className="bg-blue-600 text-white font-semibold px-4 py-2.5 rounded-xl text-xs hover:bg-blue-500 shadow-lg shadow-blue-600/25 transition self-start sm:self-auto shrink-0"
         >
           + New User
         </button>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           placeholder="Search by name or email..."
@@ -110,7 +110,8 @@ export default function UsersPage() {
         ) : filteredUsers.length === 0 ? (
           <p className="p-8 text-center text-gray-500 text-xs">No users found</p>
         ) : (
-          <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse min-w-[550px]">
             <thead className="bg-[#0B0E17] text-gray-400 text-xs uppercase tracking-wider border-b border-[#22293F]">
               <tr>
                 <th className="px-6 py-3.5">Name</th>
@@ -150,6 +151,7 @@ export default function UsersPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
