@@ -2,20 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send,
   Hash,
-  Search,
-  Phone,
-  Video,
   MessageSquare,
   Loader2,
-  PhoneOff,
-  Mic,
-  MicOff,
-  VideoOff,
-  Volume2,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserProjects } from '@/lib/actions/projects';
@@ -47,16 +38,6 @@ interface ChatMessage {
   isSelf: boolean;
 }
 
-interface ActiveCall {
-  type: 'audio' | 'video';
-  targetName: string;
-  targetInitials: string;
-  status: 'calling' | 'connected';
-  duration: number;
-  isMuted: boolean;
-  isVideoOff: boolean;
-}
-
 function getInitials(name: string) {
   if (!name) return 'U';
   return name
@@ -79,12 +60,6 @@ function formatRole(role?: string) {
     default:
       return role;
   }
-}
-
-function formatCallDuration(seconds: number) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 const colorPalette = [
@@ -114,12 +89,7 @@ export default function MessagesPage() {
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
 
-  // Calling Feature State
-  const [activeCall, setActiveCall] = useState<ActiveCall | null>(null);
-
   const currentUserId = session?.user?.id;
-  const currentUserName = session?.user?.name || 'User';
-  const currentUserInitials = getInitials(currentUserName);
 
   // Derive target channel string for backend database
   const getChannelKey = useCallback(() => {
@@ -141,7 +111,7 @@ export default function MessagesPage() {
         getWorkspaceUsers(),
       ]);
 
-      const formattedProjects = (projectsData as any[]).map((p) => ({
+      const formattedProjects = (projectsData as Array<{ id: string; name: string }>).map((p) => ({
         id: p.id,
         name: p.name.toLowerCase().replace(/\s+/g, '-'),
       }));
@@ -155,7 +125,8 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
-    void loadChannelsAndUsers();
+    const t = setTimeout(() => void loadChannelsAndUsers(), 0);
+    return () => clearTimeout(t);
   }, [loadChannelsAndUsers]);
 
   // Fetch real messages for active channel from Prisma Database
@@ -194,36 +165,20 @@ export default function MessagesPage() {
 
   // Initial load and polling every 4 seconds for real-time updates
   useEffect(() => {
-    setLoadingMessages(true);
-    void fetchMessagesForActiveChannel().finally(() => setLoadingMessages(false));
+    const t = setTimeout(() => {
+      setLoadingMessages(true);
+      void fetchMessagesForActiveChannel().finally(() => setLoadingMessages(false));
+    }, 0);
 
     const interval = setInterval(() => {
       void fetchMessagesForActiveChannel();
     }, 4000);
 
-    return () => clearInterval(interval);
-  }, [fetchMessagesForActiveChannel]);
-
-  // Call timer effect
-  useEffect(() => {
-    if (!activeCall) return;
-
-    let timer: NodeJS.Timeout;
-    if (activeCall.status === 'calling') {
-      timer = setTimeout(() => {
-        setActiveCall((prev) => (prev ? { ...prev, status: 'connected' } : null));
-      }, 1800);
-    } else if (activeCall.status === 'connected') {
-      timer = setInterval(() => {
-        setActiveCall((prev) => (prev ? { ...prev, duration: prev.duration + 1 } : null));
-      }, 1000);
-    }
-
     return () => {
-      clearTimeout(timer);
-      clearInterval(timer);
+      clearTimeout(t);
+      clearInterval(interval);
     };
-  }, [activeCall?.status]);
+  }, [fetchMessagesForActiveChannel]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,35 +199,6 @@ export default function MessagesPage() {
     } else {
       console.error('Failed to send message:', res.error);
     }
-  };
-
-  const startCall = (type: 'audio' | 'video') => {
-    const targetName = activeChannel.type === 'channel' ? `#${activeChannel.name}` : activeChannel.name;
-    const targetInitials = getInitials(activeChannel.name);
-
-    setActiveCall({
-      type,
-      targetName,
-      targetInitials,
-      status: 'calling',
-      duration: 0,
-      isMuted: false,
-      isVideoOff: false,
-    });
-  };
-
-  const endCall = () => {
-    if (!activeCall) return;
-
-    const summaryText =
-      activeCall.type === 'video'
-        ? `📹 Video Call ended • ${formatCallDuration(activeCall.duration)}`
-        : `📞 Audio Call ended • ${formatCallDuration(activeCall.duration)}`;
-
-    // Save call log to database
-    void sendChatMessage(getChannelKey(), summaryText);
-
-    setActiveCall(null);
   };
 
   return (
@@ -381,23 +307,6 @@ export default function MessagesPage() {
                 {activeChannel.type === 'channel' ? `#${activeChannel.name}` : activeChannel.name}
               </h3>
             </div>
-
-            <div className="flex items-center gap-2 text-[#8E95AF]">
-              <button
-                onClick={() => startCall('audio')}
-                className="p-2 hover:text-white rounded-lg hover:bg-[#1E2338] transition-colors"
-                title="Start Audio Call"
-              >
-                <Phone className="w-4 h-4 text-[#5B82FF]" />
-              </button>
-              <button
-                onClick={() => startCall('video')}
-                className="p-2 hover:text-white rounded-lg hover:bg-[#1E2338] transition-colors"
-                title="Start Video Call"
-              >
-                <Video className="w-4 h-4 text-[#5B82FF]" />
-              </button>
-            </div>
           </div>
 
           {/* Messages Stream */}
@@ -488,124 +397,7 @@ export default function MessagesPage() {
           </form>
         </div>
       </div>
-
-      {/* Interactive Call Overlay Modal */}
-      <AnimatePresence>
-        {activeCall && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
-          >
-            <div className="bg-[#141726] border border-[#23263A] rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
-              {/* Top info */}
-              <div className="space-y-1">
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#4E75FF]/20 text-[#5B82FF] border border-[#4E75FF]/30">
-                  {activeCall.type === 'video' ? '📹 Video Call' : '📞 Audio Call'}
-                </span>
-                <h3 className="text-xl font-bold text-white mt-2">{activeCall.targetName}</h3>
-                <p className="text-xs text-[#8E95AF]">
-                  {activeCall.status === 'calling'
-                    ? 'Connecting & Ringing...'
-                    : `Connected • ${formatCallDuration(activeCall.duration)}`}
-                </p>
-              </div>
-
-              {/* Center Graphic View */}
-              {activeCall.type === 'video' ? (
-                <div className="w-full h-52 bg-[#090B17] border border-[#23263A] rounded-2xl relative flex items-center justify-center overflow-hidden">
-                  {activeCall.isVideoOff ? (
-                    <div className="text-center text-xs text-[#8E95AF] space-y-2">
-                      <div className="w-16 h-16 rounded-full bg-[#1E2540] flex items-center justify-center mx-auto text-white font-bold text-xl border border-[#5B82FF]/40 uppercase">
-                        {activeCall.targetInitials}
-                      </div>
-                      <p>Camera Off</p>
-                    </div>
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#1E2540] via-[#141726] to-[#090B17] flex flex-col items-center justify-center relative">
-                      <div className="w-20 h-20 rounded-full bg-[#4E75FF] text-white flex items-center justify-center font-extrabold text-2xl shadow-xl uppercase border-2 border-[#5B82FF]">
-                        {activeCall.targetInitials}
-                      </div>
-                      <span className="text-[11px] text-white/80 font-medium mt-2">
-                        {activeCall.targetName}
-                      </span>
-
-                      {/* Small camera preview thumbnail */}
-                      <div className="absolute bottom-3 right-3 w-20 h-14 bg-[#090B17] border border-[#5B82FF]/40 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-[10px] text-white font-bold uppercase">
-                          {currentUserInitials} (You)
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="py-6 flex justify-center relative">
-                  <div className="relative flex items-center justify-center">
-                    {activeCall.status === 'calling' && (
-                      <div className="absolute w-28 h-28 rounded-full bg-[#4E75FF]/30 animate-ping" />
-                    )}
-                    <div className="w-24 h-24 rounded-full bg-[#4E75FF] text-white flex items-center justify-center font-extrabold text-3xl shadow-2xl uppercase border-2 border-[#5B82FF] relative z-10">
-                      {activeCall.targetInitials}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Call Controls Bar */}
-              <div className="flex items-center justify-center gap-4 pt-2">
-                {/* Mute Button */}
-                <button
-                  onClick={() =>
-                    setActiveCall((prev) => (prev ? { ...prev, isMuted: !prev.isMuted } : null))
-                  }
-                  className={`p-3.5 rounded-full transition-all border ${
-                    activeCall.isMuted
-                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                      : 'bg-[#1E2338] text-white border-[#23263A] hover:bg-[#2B314F]'
-                  }`}
-                  title={activeCall.isMuted ? 'Unmute' : 'Mute'}
-                >
-                  {activeCall.isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </button>
-
-                {/* Video Toggle (Only for Video Calls) */}
-                {activeCall.type === 'video' && (
-                  <button
-                    onClick={() =>
-                      setActiveCall((prev) =>
-                        prev ? { ...prev, isVideoOff: !prev.isVideoOff } : null
-                      )
-                    }
-                    className={`p-3.5 rounded-full transition-all border ${
-                      activeCall.isVideoOff
-                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                        : 'bg-[#1E2338] text-white border-[#23263A] hover:bg-[#2B314F]'
-                    }`}
-                    title={activeCall.isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'}
-                  >
-                    {activeCall.isVideoOff ? (
-                      <VideoOff className="w-5 h-5" />
-                    ) : (
-                      <Video className="w-5 h-5" />
-                    )}
-                  </button>
-                )}
-
-                {/* End Call Button */}
-                <button
-                  onClick={endCall}
-                  className="p-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-[0_0_15px_rgba(225,29,72,0.4)] active:scale-95"
-                  title="End Call"
-                >
-                  <PhoneOff className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </DashboardLayout>
   );
 }
+

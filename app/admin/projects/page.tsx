@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { getProjects, getProjectManagers, deleteProject } from "@/lib/actions/projects";
 import { ProjectModal } from "@/components/project-modal";
+import { User2, ClipboardList, Users } from 'lucide-react';
 
 type Project = {
   id: string;
   name: string;
   description: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | Date;
+  endDate: string | Date;
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status: "NOT_STARTED" | "IN_PROGRESS" | "ON_HOLD" | "COMPLETED";
   managerId: string;
@@ -34,13 +35,14 @@ export default function ProjectsPage() {
       getProjects(),
       getProjectManagers(),
     ]);
-    setProjects(projectsData as any);
+    setProjects(projectsData as Project[]);
     setManagers(managersData);
     setLoading(false);
   };
 
   useEffect(() => {
-    loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const handleModalClose = () => {
@@ -118,9 +120,18 @@ export default function ProjectsPage() {
                   </div>
                   <p className="text-gray-400 text-xs mb-3">{project.description}</p>
                   <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                    <span>👤 Manager: {project.manager.name}</span>
-                    <span>📋 {project._count.tasks} tasks</span>
-                    <span>👥 {project._count.members} members</span>
+                    <span className="inline-flex items-center gap-1">
+                      <User2 className="w-3.5 h-3.5 text-gray-400" />
+                      Manager: {project.manager.name}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <ClipboardList className="w-3.5 h-3.5 text-gray-400" />
+                      {project._count.tasks} tasks
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5 text-gray-400" />
+                      {project._count.members} members
+                    </span>
                   </div>
                 </div>
                 <div className="flex gap-3 ml-4 text-xs">

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { getMyProjects, getMyProjectStats } from "@/lib/actions/manager-projects";
 import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
+import { Users, ClipboardList, CalendarDays } from "lucide-react";
 
 type Project = {
   id: string;
@@ -16,7 +17,7 @@ type Project = {
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status: "NOT_STARTED" | "IN_PROGRESS" | "ON_HOLD" | "COMPLETED";
   _count: { tasks: number; members: number };
-  tasks: { id: string; status: string }[];
+  tasks: { id?: string; status: string }[];
 };
 
 function formatDate(d: string | Date) {
@@ -42,19 +43,21 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     const [projectsData, statsData] = await Promise.all([getMyProjects(), getMyProjectStats()]);
-    setProjects(projectsData as any);
+    setProjects(projectsData as Project[]);
     setStats(statsData);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    void loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, [loadData]);
 
   const userName = session?.user?.name ? session.user.name.split(" ")[0] : "Manager";
@@ -133,10 +136,17 @@ export default function ManagerDashboard() {
                   <p className="text-xs text-gray-400 line-clamp-2">{project.description}</p>
 
                   <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>📋 {project._count.tasks} tasks</span>
-                    <span>👥 {project._count.members} members</span>
-                    <span suppressHydrationWarning>
-                      📅 {mounted ? formatDate(project.startDate) : ""} - {mounted ? formatDate(project.endDate) : ""}
+                    <span className="inline-flex items-center gap-1">
+                      <ClipboardList className="w-4 h-4" />
+                      {project._count.tasks} tasks
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      {project._count.members} members
+                    </span>
+                    <span className="inline-flex items-center gap-1" suppressHydrationWarning>
+                      <CalendarDays className="w-4 h-4" />
+                      {mounted ? formatDate(project.startDate) : ""} - {mounted ? formatDate(project.endDate) : ""}
                     </span>
                   </div>
 

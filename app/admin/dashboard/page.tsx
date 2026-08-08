@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
+import { FolderKanban, Users } from "lucide-react";
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -73,7 +74,7 @@ export default async function AdminDashboard() {
           className="group bg-[#131725] border border-[#22293F] hover:border-blue-500/50 rounded-2xl p-6 transition-all shadow-lg flex items-center gap-5"
         >
           <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-            📁
+            <FolderKanban className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
@@ -90,7 +91,7 @@ export default async function AdminDashboard() {
           className="group bg-[#131725] border border-[#22293F] hover:border-purple-500/50 rounded-2xl p-6 transition-all shadow-lg flex items-center gap-5"
         >
           <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-            👥
+            <Users className="w-6 h-6" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-white group-hover:text-purple-400 transition-colors">

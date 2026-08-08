@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/app/generated/prisma/client";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -40,7 +41,7 @@ async function requireTaskAccess(taskId: string) {
 }
 
 export async function getTaskDetail(taskId: string) {
-  const { task } = await requireTaskAccess(taskId);
+  await requireTaskAccess(taskId);
 
   return prisma.task.findUnique({
     where: { id: taskId },
@@ -106,7 +107,7 @@ export async function getUserWorkspaceTasks() {
   const userId = session.user.id;
   const role = session.user.role;
 
-  let whereClause: any = {};
+  let whereClause: Prisma.TaskWhereInput = {};
 
   if (role === "PROJECT_MANAGER") {
     whereClause = {

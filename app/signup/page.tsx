@@ -71,9 +71,10 @@ export default function SignupPage() {
         router.push('/dashboard');
         router.refresh();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLoading(false);
-      setError(err.message || 'An error occurred during registration.');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'An error occurred during registration.');
     }
   };
 
@@ -153,7 +154,7 @@ export default function SignupPage() {
                   <Briefcase className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
                   <select
                     value={role}
-                    onChange={(e) => setRole(e.target.value as any)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRole(e.target.value as 'TEAM_MEMBER' | 'PROJECT_MANAGER')}
                     className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl pl-10 pr-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#5B82FF] transition-all cursor-pointer"
                   >
                     <option value="TEAM_MEMBER">Team Member</option>

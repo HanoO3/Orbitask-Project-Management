@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getUsers, deleteUser } from "@/lib/actions/users";
 import { UserModal } from "@/components/user-modal";
 
@@ -20,16 +20,18 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     const data = await getUsers();
     setUsers(data as User[]);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    const t = setTimeout(() => void loadUsers(), 0);
+    return () => clearTimeout(t);
+  }, [loadUsers]);
+
 
   const handleModalClose = () => {
     setModalOpen(false);

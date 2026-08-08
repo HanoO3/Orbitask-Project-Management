@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock, AlertCircle, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, TrendingUp, ArrowUpRight } from 'lucide-react';
 
 export interface MetricProps {
   title: string;

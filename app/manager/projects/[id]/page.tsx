@@ -12,8 +12,7 @@ import {
 } from '@/lib/actions/manager-projects';
 import { TaskModal } from '@/components/task-modal';
 import { NotificationBell } from '@/components/notification-bell';
-import { Calendar, User, ArrowLeft, Plus, Trash2, Edit3, MessageSquare, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Calendar, User, ArrowLeft, Plus, Clock, User2 } from 'lucide-react';
 
 type Member = { id: string; name: string; email: string };
 
@@ -100,7 +99,8 @@ export default function ManagerProjectDetail({
   }, [projectId]);
 
   useEffect(() => {
-    void loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, [loadData]);
 
   const handleAddMember = async () => {
@@ -283,9 +283,11 @@ export default function ManagerProjectDetail({
                           <p className="text-[#8E95AF] text-[11px] mb-3 line-clamp-2 leading-relaxed">{task.description}</p>
 
                           <div className="flex items-center gap-2 text-[10px] text-[#626A86] mb-3 border-t border-[#23263A] pt-2">
-                            <span>👤 {task.assignee ? task.assignee.name : 'Unassigned'}</span>
-                            <span>·</span>
-                            <span>📅 {new Date(task.dueDate).toLocaleDateString()}</span>
+                            <User2 className="w-3.5 h-3.5 text-[#5B82FF]" />
+                            <span>{task.assignee ? task.assignee.name : 'Unassigned'}</span>
+                            <span className="text-sm">·</span>
+                            <Clock className="w-3.5 h-3.5 text-[#5B82FF]" />
+                            <span>{new Date(task.dueDate).toLocaleDateString()}</span>
                           </div>
 
                           <div className="flex items-center justify-between pt-1">

@@ -43,24 +43,27 @@ export function ProjectModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (editingProject) {
-      setName(editingProject.name);
-      setDescription(editingProject.description);
-      setStartDate(formatDateInput(editingProject.startDate));
-      setEndDate(formatDateInput(editingProject.endDate));
-      setPriority(editingProject.priority);
-      setStatus(editingProject.status);
-      setManagerId(editingProject.managerId);
-    } else {
-      setName('');
-      setDescription('');
-      setStartDate('');
-      setEndDate('');
-      setPriority('MEDIUM');
-      setStatus('NOT_STARTED');
-      setManagerId(managers[0]?.id || '');
-    }
-    setError('');
+    const t = setTimeout(() => {
+      if (editingProject) {
+        setName(editingProject.name);
+        setDescription(editingProject.description);
+        setStartDate(formatDateInput(editingProject.startDate));
+        setEndDate(formatDateInput(editingProject.endDate));
+        setPriority(editingProject.priority);
+        setStatus(editingProject.status);
+        setManagerId(editingProject.managerId);
+      } else {
+        setName('');
+        setDescription('');
+        setStartDate('');
+        setEndDate('');
+        setPriority('MEDIUM');
+        setStatus('NOT_STARTED');
+        setManagerId(managers[0]?.id || '');
+      }
+      setError('');
+    }, 0);
+    return () => clearTimeout(t);
   }, [editingProject, isOpen, managers]);
 
   if (!isOpen) return null;
@@ -161,7 +164,7 @@ export function ProjectModal({
               <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Priority</label>
               <select
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT')}
                 className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="LOW">Low</option>
@@ -175,7 +178,7 @@ export function ProjectModal({
               <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Status</label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as 'NOT_STARTED' | 'IN_PROGRESS' | 'ON_HOLD' | 'COMPLETED')}
                 className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="NOT_STARTED">Not Started</option>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, Clock, Check, Loader2, CheckCircle2, User as UserIcon } from 'lucide-react';
+import { Search, Clock, Check, Loader2, CheckCircle2 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserWorkspaceTasks, toggleTaskStatus } from '@/lib/actions/task-comments';
 
@@ -66,7 +66,8 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    void loadTasks();
+    const t = setTimeout(() => void loadTasks(), 0);
+    return () => clearTimeout(t);
   }, [loadTasks]);
 
   const handleToggleTask = async (id: string, e: React.MouseEvent) => {

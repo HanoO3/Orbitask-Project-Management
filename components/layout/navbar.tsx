@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { Menu, Bell, Plus, User, LogOut, Settings, Check } from 'lucide-react';
+import { Menu, Plus, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationBell } from '@/components/notification-bell';
 
@@ -19,9 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewTaskModal,
 }) => {
   const { data: session } = useSession();
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [notificationsRead, setNotificationsRead] = useState(false);
 
   const userName = session?.user?.name || 'User';
   const userEmail = session?.user?.email || '';
@@ -68,10 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Profile Avatar circle */}
         <div className="relative">
           <button
-            onClick={() => {
-              setShowProfileMenu(!showProfileMenu);
-              setShowNotifications(false);
-            }}
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center justify-center w-9 h-9 rounded-full bg-[#4E75FF] text-white font-bold text-xs shadow-md border border-[#5B82FF]/40 hover:ring-2 hover:ring-[#5B82FF]/60 transition-all uppercase"
             aria-label="User Profile"
           >

@@ -14,7 +14,7 @@ const createPrismaClient = () =>
   });
 
 export const prisma =
-  globalForPrisma.prisma && (globalForPrisma.prisma as any).chatMessage
+  globalForPrisma.prisma && (globalForPrisma.prisma as { chatMessage?: unknown }).chatMessage
     ? globalForPrisma.prisma
     : (globalForPrisma.prisma = createPrismaClient());
 

@@ -40,9 +40,10 @@ export async function sendChatMessage(channel: string, content: string) {
 
     revalidatePath("/messages");
     return { success: true, message };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("sendChatMessage error:", err);
-    return { success: false, error: err.message || "Failed to send message" };
+    const message = err instanceof Error ? err.message : String(err);
+    return { success: false, error: message || "Failed to send message" };
   }
 }
 

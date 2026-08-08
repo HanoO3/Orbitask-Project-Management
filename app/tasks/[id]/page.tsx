@@ -3,9 +3,8 @@
 import { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 import { getTaskDetail, addTaskComment } from '@/lib/actions/task-comments';
-import { useSession } from 'next-auth/react';
 import { NotificationBell } from '@/components/notification-bell';
-import { ArrowLeft, Calendar, User, MessageSquare, Send } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
 
 type Comment = {
   id: string;
@@ -49,7 +48,6 @@ const statusBadge = (s: string) => {
 
 export default function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: taskId } = use(params);
-  const { data: session } = useSession();
 
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +63,8 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
   }, [taskId]);
 
   useEffect(() => {
-    void loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, [loadData]);
 
   const handleAddComment = async (e: React.FormEvent) => {

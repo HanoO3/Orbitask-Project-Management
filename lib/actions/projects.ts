@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/app/generated/prisma/client";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
@@ -32,7 +33,7 @@ export async function getUserProjects() {
   const userId = session.user.id;
   const role = session.user.role;
 
-  let whereClause: any = {};
+  let whereClause: Prisma.ProjectWhereInput = {};
   if (role === "PROJECT_MANAGER") {
     whereClause = {
       OR: [

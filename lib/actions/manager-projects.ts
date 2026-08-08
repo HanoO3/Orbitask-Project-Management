@@ -151,7 +151,7 @@ export async function createTask(
   try {
     const session = await requireOwnedProject(projectId);
 
-    const task = await prisma.task.create({
+    await prisma.task.create({
       data: {
         title: data.title,
         description: data.description,
@@ -174,8 +174,9 @@ export async function createTask(
 
     revalidatePath(`/manager/projects/${projectId}`);
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to create task" };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { success: false, error: message || "Failed to create task" };
   }
 }
 
@@ -219,8 +220,9 @@ export async function updateTask(
 
     revalidatePath(`/manager/projects/${projectId}`);
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Failed to update task" };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { success: false, error: message || "Failed to update task" };
   }
 }
 

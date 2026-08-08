@@ -96,7 +96,8 @@ export default function SettingsPage() {
   }, [session]);
 
   useEffect(() => {
-    void loadProfileData();
+    const t = setTimeout(() => void loadProfileData(), 0);
+    return () => clearTimeout(t);
   }, [loadProfileData]);
 
   const userInitials = (name || session?.user?.name || 'User')
@@ -181,8 +182,8 @@ export default function SettingsPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id as any);
+                onClick={() => {
+                setActiveTab(tab.id as 'profile' | 'security' | 'notifications' | 'team');
                 setMessage(null);
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 ${

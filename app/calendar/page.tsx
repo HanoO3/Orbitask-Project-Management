@@ -73,7 +73,8 @@ export default function CalendarPage() {
   }, []);
 
   useEffect(() => {
-    void loadCalendarData();
+    const t = setTimeout(() => void loadCalendarData(), 0);
+    return () => clearTimeout(t);
   }, [loadCalendarData]);
 
   const handlePrevMonth = () => {
@@ -120,6 +121,8 @@ export default function CalendarPage() {
     }
     return { dayTasks: [], dayProjects: [] };
   })();
+
+
 
   return (
     <DashboardLayout title="Calendar">
@@ -233,9 +236,10 @@ export default function CalendarPage() {
                       {dayProjects.map((p) => (
                         <div
                           key={`proj-${p.id}`}
-                          className="text-[9px] font-bold text-white truncate px-1.5 py-0.5 rounded bg-purple-600/90"
+                          className="text-[9px] font-bold text-white truncate px-1.5 py-0.5 rounded bg-purple-600/90 flex items-center"
                         >
-                          📌 {p.name}
+                          <ArrowRight className="w-3 h-3 mr-1" />
+                          <span className="truncate">{p.name}</span>
                         </div>
                       ))}
 

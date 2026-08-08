@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getProfile, updateProfile } from '@/lib/actions/profile';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { User, Lock, Save, Check } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 type ProfileData = {
   id: string;
@@ -31,7 +30,7 @@ function formatDate(d: string | Date) {
 }
 
 export default function ProfilePage() {
-  const { data: session, update: updateSession } = useSession();
+  const { update: updateSession } = useSession();
   const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +45,8 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const loadData = useCallback(async () => {
@@ -61,7 +61,8 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    void loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Search, FolderKanban, Loader2, ArrowRight, Shield, User as UserIcon } from 'lucide-react';
+import { Search, FolderKanban, Loader2, ArrowRight } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserProjects } from '@/lib/actions/projects';
 
@@ -71,7 +71,8 @@ export default function ProjectsPage() {
   }, []);
 
   useEffect(() => {
-    void loadProjects();
+    const t = setTimeout(() => void loadProjects(), 0);
+    return () => clearTimeout(t);
   }, [loadProjects]);
 
   const filteredProjects = projects.filter((p) => {
@@ -197,8 +198,6 @@ export default function ProjectsPage() {
             const href = getProjectHref(project.id);
             const isClickable = href !== '#';
 
-            const CardWrapper = isClickable ? Link : ('div' as any);
-
             return (
               <motion.div
                 key={project.id}
@@ -206,13 +205,11 @@ export default function ProjectsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.08 }}
               >
-                <CardWrapper
-                  href={isClickable ? href : undefined}
-                  className={`bg-[#141726] border border-[#23263A] ${
-                    isClickable ? 'hover:border-[#5B82FF] cursor-pointer' : 'hover:border-[#333754]'
-                  } rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all group block h-full`}
-                >
-                  <div>
+                {isClickable ? (
+                  <Link
+                    href={href}
+                    className={`bg-[#141726] border border-[#23263A] hover:border-[#5B82FF] cursor-pointer rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all group block h-full`}
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shrink-0">
@@ -222,9 +219,7 @@ export default function ProjectsPage() {
                           <h3 className="text-base font-bold text-white group-hover:text-[#5B82FF] transition-colors">
                             {project.name}
                           </h3>
-                          <p className="text-xs text-[#8E95AF]">
-                            Due {formatDate(project.endDate)}
-                          </p>
+                          <p className="text-xs text-[#8E95AF]">Due {formatDate(project.endDate)}</p>
                         </div>
                       </div>
                       {getStatusBadge(project.displayStatus)}
@@ -233,62 +228,121 @@ export default function ProjectsPage() {
                     <p className="text-xs text-[#8E95AF] mb-5 leading-relaxed line-clamp-2">
                       {project.description || 'Workspace project deliverables and task tracking.'}
                     </p>
-                  </div>
 
-                  <div className="space-y-3 pt-4 border-t border-[#23263A]">
-                    {/* Manager & Team Info */}
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#8E95AF]">Manager:</span>
-                        <span className="font-semibold text-white">
-                          {project.manager?.name || 'Unassigned'}
-                        </span>
-                      </div>
+                    <div className="space-y-3 pt-4 border-t border-[#23263A]">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#8E95AF]">Manager:</span>
+                          <span className="font-semibold text-white">{project.manager?.name || 'Unassigned'}</span>
+                        </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[#8E95AF]">Members:</span>
-                        {project.members && project.members.length > 0 ? (
-                          <div className="flex -space-x-2 overflow-hidden">
-                            {project.members.slice(0, 4).map((m, mIdx) => {
-                              const initials = getInitials(m.user.name);
-                              const colorClass = bgColors[mIdx % bgColors.length];
-                              return (
-                                <div
-                                  key={m.user.id}
-                                  title={m.user.name}
-                                  className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-[#141726] ${colorClass}`}
-                                >
-                                  {initials}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[#8E95AF]">Members:</span>
+                          {project.members && project.members.length > 0 ? (
+                            <div className="flex -space-x-2 overflow-hidden">
+                              {project.members.slice(0, 4).map((m, mIdx) => {
+                                const initials = getInitials(m.user.name);
+                                const colorClass = bgColors[mIdx % bgColors.length];
+                                return (
+                                  <div
+                                    key={m.user.id}
+                                    title={m.user.name}
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-[#141726] ${colorClass}`}
+                                  >
+                                    {initials}
+                                  </div>
+                                );
+                              })}
+                              {project.members.length > 4 && (
+                                <div className="w-6 h-6 rounded-full bg-[#23263A] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[#141726]">
+                                  +{project.members.length - 4}
                                 </div>
-                              );
-                            })}
-                            {project.members.length > 4 && (
-                              <div className="w-6 h-6 rounded-full bg-[#23263A] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[#141726]">
-                                +{project.members.length - 4}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-[#8E95AF]">None</span>
-                        )}
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-[#8E95AF]">None</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[#8E95AF]">Overall Progress</span>
+                          <span className="font-semibold text-white">{project.progress}%</span>
+                        </div>
+                        <div className="w-full bg-[#1C2035] rounded-full h-2 overflow-hidden">
+                          <div className="bg-[#4E75FF] h-full rounded-full transition-all duration-500" style={{ width: `${project.progress}%` }} />
+                        </div>
                       </div>
                     </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-[#8E95AF]">Overall Progress</span>
-                        <span className="font-semibold text-white">{project.progress}%</span>
+                  </Link>
+                ) : (
+                  <div className={`bg-[#141726] border border-[#23263A] hover:border-[#333754] rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all group block h-full`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#1E2338] border border-[#2B314F] flex items-center justify-center shrink-0">
+                          <FolderKanban className="w-5 h-5 text-[#5B82FF]" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white">{project.name}</h3>
+                          <p className="text-xs text-[#8E95AF]">Due {formatDate(project.endDate)}</p>
+                        </div>
                       </div>
-                      <div className="w-full bg-[#1C2035] rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-[#4E75FF] h-full rounded-full transition-all duration-500"
-                          style={{ width: `${project.progress}%` }}
-                        />
+                      {getStatusBadge(project.displayStatus)}
+                    </div>
+
+                    <p className="text-xs text-[#8E95AF] mb-5 leading-relaxed line-clamp-2">
+                      {project.description || 'Workspace project deliverables and task tracking.'}
+                    </p>
+
+                    <div className="space-y-3 pt-4 border-t border-[#23263A]">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#8E95AF]">Manager:</span>
+                          <span className="font-semibold text-white">{project.manager?.name || 'Unassigned'}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[#8E95AF]">Members:</span>
+                          {project.members && project.members.length > 0 ? (
+                            <div className="flex -space-x-2 overflow-hidden">
+                              {project.members.slice(0, 4).map((m, mIdx) => {
+                                const initials = getInitials(m.user.name);
+                                const colorClass = bgColors[mIdx % bgColors.length];
+                                return (
+                                  <div
+                                    key={m.user.id}
+                                    title={m.user.name}
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white ring-2 ring-[#141726] ${colorClass}`}
+                                  >
+                                    {initials}
+                                  </div>
+                                );
+                              })}
+                              {project.members.length > 4 && (
+                                <div className="w-6 h-6 rounded-full bg-[#23263A] text-white flex items-center justify-center text-[10px] font-bold ring-2 ring-[#141726]">
+                                  +{project.members.length - 4}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-[#8E95AF]">None</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[#8E95AF]">Overall Progress</span>
+                          <span className="font-semibold text-white">{project.progress}%</span>
+                        </div>
+                        <div className="w-full bg-[#1C2035] rounded-full h-2 overflow-hidden">
+                          <div className="bg-[#4E75FF] h-full rounded-full transition-all duration-500" style={{ width: `${project.progress}%` }} />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </CardWrapper>
+                )}
               </motion.div>
             );
           })}

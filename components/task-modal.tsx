@@ -43,22 +43,25 @@ export function TaskModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (editingTask) {
-      setTitle(editingTask.title);
-      setDescription(editingTask.description);
-      setPriority(editingTask.priority);
-      setStatus(editingTask.status);
-      setDueDate(formatDateInput(editingTask.dueDate));
-      setAssigneeId(editingTask.assigneeId || '');
-    } else {
-      setTitle('');
-      setDescription('');
-      setPriority('MEDIUM');
-      setStatus('TODO');
-      setDueDate('');
-      setAssigneeId('');
-    }
-    setError('');
+    const t = setTimeout(() => {
+      if (editingTask) {
+        setTitle(editingTask.title);
+        setDescription(editingTask.description);
+        setPriority(editingTask.priority);
+        setStatus(editingTask.status);
+        setDueDate(formatDateInput(editingTask.dueDate));
+        setAssigneeId(editingTask.assigneeId || '');
+      } else {
+        setTitle('');
+        setDescription('');
+        setPriority('MEDIUM');
+        setStatus('TODO');
+        setDueDate('');
+        setAssigneeId('');
+      }
+      setError('');
+    }, 0);
+    return () => clearTimeout(t);
   }, [editingTask, isOpen]);
 
   if (!isOpen) return null;
@@ -137,7 +140,7 @@ export function TaskModal({
               <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Priority</label>
               <select
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT')}
                 className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="LOW">Low</option>
@@ -151,7 +154,7 @@ export function TaskModal({
               <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Status</label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatus(e.target.value as 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED')}
                 className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
               >
                 <option value="TODO">To Do</option>

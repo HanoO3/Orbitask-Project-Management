@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Task, priorityBadgeStyle, formatDate } from './types';
 
@@ -34,7 +35,7 @@ export function MemberTasksList({
         <div className="flex items-center gap-3">
           <select
             value={taskScope}
-            onChange={(e) => setTaskScope(e.target.value as any)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTaskScope(e.target.value as 'assigned' | 'all_project_tasks')}
             className="bg-[#0B0E17] border border-[#22293F] text-xs text-gray-300 rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="assigned">Assigned to Me</option>
@@ -81,15 +82,16 @@ export function MemberTasksList({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-gray-400 hidden sm:inline" suppressHydrationWarning>
-                    🕒 {mounted ? formatDate(task.dueDate) : ''}
-                  </span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-gray-400 hidden sm:inline flex items-center gap-1" suppressHydrationWarning>
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{mounted ? formatDate(task.dueDate) : ''}</span>
+                    </span>
 
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${priorityBadgeStyle(task.priority)}`}>
-                    {task.priority}
-                  </span>
-                </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${priorityBadgeStyle(task.priority)}`}>
+                      {task.priority}
+                    </span>
+                  </div>
               </div>
             );
           })}

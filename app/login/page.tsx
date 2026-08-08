@@ -38,9 +38,10 @@ export default function LoginPage() {
         router.push('/dashboard');
         router.refresh();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLoading(false);
-      setError('An error occurred while signing in. Please try again.');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'An error occurred while signing in. Please try again.');
     }
   };
 

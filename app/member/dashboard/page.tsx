@@ -14,6 +14,7 @@ import { NotificationBell } from "@/components/notification-bell";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
 import { CheckSquare, Clock, CheckCircle2, FolderKanban, Users } from "lucide-react";
 
+
 type ProjectMember = {
   id: string;
   user: {
@@ -70,6 +71,8 @@ function getInitials(name: string) {
     .toUpperCase()
     .slice(0, 2);
 }
+
+
 
 const priorityBadgeStyle = (p: string) => {
   const styles: Record<string, string> = {
@@ -131,7 +134,8 @@ export default function MemberDashboard() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
+    const t = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(t);
   }, []);
 
   const loadData = useCallback(async () => {
@@ -154,7 +158,8 @@ export default function MemberDashboard() {
   }, [taskScope]);
 
   useEffect(() => {
-    void loadData();
+    const t = setTimeout(() => void loadData(), 0);
+    return () => clearTimeout(t);
   }, [loadData]);
 
   const handleStatusChange = async (taskId: string, currentStatus: Task["status"]) => {
@@ -407,7 +412,7 @@ export default function MemberDashboard() {
             <div className="flex items-center gap-3">
               <select
                 value={taskScope}
-                onChange={(e) => setTaskScope(e.target.value as any)}
+                onChange={(e) => setTaskScope(e.target.value as "assigned" | "all_project_tasks")}
                 className="bg-[#0B0E17] border border-[#22293F] text-xs text-gray-300 rounded-xl px-3 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="assigned">Assigned to Me</option>
@@ -455,8 +460,9 @@ export default function MemberDashboard() {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-gray-400 hidden sm:inline" suppressHydrationWarning>
-                        🕒 {mounted ? formatDate(task.dueDate) : ""}
+                      <span className="text-xs text-gray-400 hidden sm:inline flex items-center gap-1" suppressHydrationWarning>
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{mounted ? formatDate(task.dueDate) : ""}</span>
                       </span>
 
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${priorityBadgeStyle(task.priority)}`}>

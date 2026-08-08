@@ -28,18 +28,21 @@ export function UserModal({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (editingUser) {
-      setName(editingUser.name);
-      setEmail(editingUser.email);
-      setPassword('');
-      setRole(editingUser.role);
-    } else {
-      setName('');
-      setEmail('');
-      setPassword('');
-      setRole('TEAM_MEMBER');
-    }
-    setError('');
+    const t = setTimeout(() => {
+      if (editingUser) {
+        setName(editingUser.name);
+        setEmail(editingUser.email);
+        setPassword('');
+        setRole(editingUser.role);
+      } else {
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRole('TEAM_MEMBER');
+      }
+      setError('');
+    }, 0);
+    return () => clearTimeout(t);
   }, [editingUser, isOpen]);
 
   if (!isOpen) return null;
@@ -68,7 +71,7 @@ export function UserModal({
 
     const res = editingUser
       ? await updateUser(editingUser.id, payload)
-      : await createUser(payload as any);
+      : await createUser({ name, email, password: password!, role });
 
     setLoading(false);
 
@@ -133,7 +136,7 @@ export function UserModal({
             <label className="block text-xs font-semibold text-[#8E95AF] mb-1 uppercase tracking-wider">Role</label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as any)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setRole(e.target.value as 'ADMIN' | 'PROJECT_MANAGER' | 'TEAM_MEMBER')}
               className="w-full bg-[#0B0D1A] border border-[#23263A] rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
             >
               <option value="TEAM_MEMBER">Team Member</option>

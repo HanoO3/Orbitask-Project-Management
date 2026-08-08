@@ -11,7 +11,7 @@ import {
   clearAllNotifications,
   checkApproachingDeadlines,
 } from '@/lib/actions/notifications';
-import { Bell, Check, Trash2, X } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 
 type Notification = {
   id: string;
@@ -49,11 +49,14 @@ export function NotificationBell() {
   }, []);
 
   useEffect(() => {
-    void loadNotifications();
+    const t = setTimeout(() => void loadNotifications(), 0);
     const interval = setInterval(() => {
       void loadNotifications();
     }, 15000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(t);
+      clearInterval(interval);
+    };
   }, [loadNotifications]);
 
   useEffect(() => {
