@@ -59,6 +59,8 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('All');
 
+  const [sortBy, setSortBy] = useState<'name' | 'priority' | 'status' | 'date'>('name');
+
   const loadProjects = useCallback(async () => {
     setLoading(true);
     try {
@@ -75,11 +77,21 @@ export default function ProjectsPage() {
     return () => clearTimeout(t);
   }, [loadProjects]);
 
-  const filteredProjects = projects.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'All' || p.displayStatus === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  const priorityOrder: Record<string, number> = { URGENT: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+
+  const filteredProjects = projects
+    .filter((p) => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFilter = filterStatus === 'All' || p.displayStatus === filterStatus;
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'priority') return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+      if (sortBy === 'status') return a.displayStatus.localeCompare(b.displayStatus);
+      if (sortBy === 'date') return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
+      return 0;
+    });
 
   const getStatusBadge = (status: RealProject['displayStatus']) => {
     switch (status) {
@@ -141,6 +153,17 @@ export default function ProjectsPage() {
               className="w-full sm:w-48 bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
             />
           </div>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'name' | 'priority' | 'status' | 'date')}
+            className="bg-[#141726] border border-[#23263A] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="priority">Sort by Priority</option>
+            <option value="status">Sort by Status</option>
+            <option value="date">Sort by Due Date</option>
+          </select>
 
           <div className="flex flex-wrap bg-[#141726] border border-[#23263A] rounded-xl p-1 text-xs max-w-full overflow-x-auto">
             {['All', 'On track', 'At risk', 'Delayed', 'Completed'].map((status) => (

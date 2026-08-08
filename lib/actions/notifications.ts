@@ -18,6 +18,12 @@ export async function getMyNotifications() {
   const session = await auth();
   if (!session?.user) return [];
 
+  try {
+    await checkApproachingDeadlines();
+  } catch (err) {
+    console.error("Deadline check error:", err);
+  }
+
   return prisma.notification.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
@@ -85,14 +91,14 @@ export async function checkApproachingDeadlines() {
   if (!session?.user) return;
 
   const now = new Date();
-  const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const next48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-  // Find non-completed tasks assigned to the user due within the next 24 hours
+  // Find non-completed tasks assigned to the user due within the next 48 hours
   const upcomingTasks = await prisma.task.findMany({
     where: {
       assigneeId: session.user.id,
       status: { not: "COMPLETED" },
-      dueDate: { gte: now, lte: next24Hours },
+      dueDate: { gte: now, lte: next48Hours },
     },
     include: { project: true },
   });

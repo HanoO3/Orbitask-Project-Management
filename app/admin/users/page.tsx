@@ -18,6 +18,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState<'name' | 'role' | 'approvalStatus'>('name');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,14 +70,21 @@ export default function UsersPage() {
     loadUsers();
   };
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
-    const matchesStatus = statusFilter === "ALL" || u.approvalStatus === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredUsers = users
+    .filter((u) => {
+      const matchesSearch =
+        u.name.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase());
+      const matchesRole = roleFilter === "ALL" || u.role === roleFilter;
+      const matchesStatus = statusFilter === "ALL" || u.approvalStatus === statusFilter;
+      return matchesSearch && matchesRole && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'role') return a.role.localeCompare(b.role);
+      if (sortBy === 'approvalStatus') return (a.approvalStatus || 'APPROVED').localeCompare(b.approvalStatus || 'APPROVED');
+      return 0;
+    });
 
   const roleBadge = (role: string) => {
     const styles: Record<string, string> = {
@@ -122,6 +130,16 @@ export default function UsersPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 bg-[#131725] border border-[#22293F] text-white px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-blue-500"
         />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'name' | 'role' | 'approvalStatus')}
+          className="bg-[#131725] border border-[#22293F] text-white px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-blue-500"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="role">Sort by Role</option>
+          <option value="approvalStatus">Sort by Status</option>
+        </select>
+
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}

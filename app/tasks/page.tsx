@@ -54,6 +54,8 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
+  const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'status' | 'title'>('dueDate');
+
   const loadTasks = useCallback(async () => {
     setLoading(true);
     try {
@@ -92,20 +94,31 @@ export default function TasksPage() {
     setTogglingId(null);
   };
 
-  const filteredTasks = tasks.filter((t) => {
-    const titleMatch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const projectMatch = t.project?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSearch = titleMatch || projectMatch;
+  const priorityOrder: Record<string, number> = { URGENT: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+  const statusOrder: Record<string, number> = { TODO: 1, IN_PROGRESS: 2, REVIEW: 3, COMPLETED: 4 };
 
-    const taskIsCompleted = t.status === 'COMPLETED';
-    const taskIsOverdue = isOverdue(t.dueDate, t.status);
+  const filteredTasks = tasks
+    .filter((t) => {
+      const titleMatch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const projectMatch = t.project?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = titleMatch || projectMatch;
 
-    if (activeTab === 'In Progress') return matchesSearch && !taskIsCompleted && !taskIsOverdue;
-    if (activeTab === 'Overdue') return matchesSearch && taskIsOverdue;
-    if (activeTab === 'Completed') return matchesSearch && taskIsCompleted;
+      const taskIsCompleted = t.status === 'COMPLETED';
+      const taskIsOverdue = isOverdue(t.dueDate, t.status);
 
-    return matchesSearch;
-  });
+      if (activeTab === 'In Progress') return matchesSearch && !taskIsCompleted && !taskIsOverdue;
+      if (activeTab === 'Overdue') return matchesSearch && taskIsOverdue;
+      if (activeTab === 'Completed') return matchesSearch && taskIsCompleted;
+
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'dueDate') return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (sortBy === 'priority') return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+      if (sortBy === 'status') return (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      return 0;
+    });
 
   const getPriorityBadge = (priority: RealTask['priority']) => {
     switch (priority) {
@@ -147,16 +160,29 @@ export default function TasksPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tasks or projects..."
-            className="w-full bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
-          />
+        {/* Search & Sort */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-64">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E95AF]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tasks or projects..."
+              className="w-full bg-[#141726] border border-[#23263A] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-[#626A86] focus:outline-none focus:border-[#5B82FF]"
+            />
+          </div>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'dueDate' | 'priority' | 'status' | 'title')}
+            className="bg-[#141726] border border-[#23263A] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#5B82FF]"
+          >
+            <option value="dueDate">Sort by Due Date</option>
+            <option value="priority">Sort by Priority</option>
+            <option value="status">Sort by Status</option>
+            <option value="title">Sort by Title</option>
+          </select>
         </div>
       </div>
 

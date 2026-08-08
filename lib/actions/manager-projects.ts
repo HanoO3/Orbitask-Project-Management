@@ -14,10 +14,25 @@ async function requireManager() {
 }
 
 async function requireOwnedProject(projectId: string) {
-  const session = await requireManager();
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+  if (session.user.role === "ADMIN") {
+    return session;
+  }
   const project = await prisma.project.findUnique({ where: { id: projectId } });
-  if (!project || project.managerId !== session.user.id) {
-    throw new Error("Unauthorized: Not your project");
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  const isManager = project.managerId === session.user.id;
+  const isMember = await prisma.projectMember.findFirst({
+    where: { projectId, userId: session.user.id }
+  });
+
+  if (!isManager && !isMember) {
+    throw new Error("Unauthorized: Access denied to this project");
   }
   return session;
 }
