@@ -6,12 +6,16 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("Admin@123", 10);
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin@123";
+  const userPassword = process.env.SEED_USER_PASSWORD || "Admin@123";
+
+  const adminHashedPassword = await bcrypt.hash(adminPassword, 10);
+  const userHashedPassword = await bcrypt.hash(userPassword, 10);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@orbitask.com" },
     update: {
-      password: hashedPassword,
+      password: adminHashedPassword,
       role: "ADMIN",
       approvalStatus: "APPROVED",
     },
@@ -19,7 +23,7 @@ async function main() {
       id: "admin-user",
       name: "Hana Nasir",
       email: "admin@orbitask.com",
-      password: hashedPassword,
+      password: adminHashedPassword,
       role: "ADMIN",
       approvalStatus: "APPROVED",
     },
@@ -28,7 +32,7 @@ async function main() {
   const projectManager = await prisma.user.upsert({
     where: { email: "pm@orbitask.com" },
     update: {
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "PROJECT_MANAGER",
       approvalStatus: "APPROVED",
     },
@@ -36,7 +40,7 @@ async function main() {
       id: "pm-user",
       name: "Test PM",
       email: "pm@orbitask.com",
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "PROJECT_MANAGER",
       approvalStatus: "APPROVED",
     },
@@ -45,7 +49,7 @@ async function main() {
   const teamMemberOne = await prisma.user.upsert({
     where: { email: "tm1@orbitask.com" },
     update: {
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "TEAM_MEMBER",
       approvalStatus: "APPROVED",
     },
@@ -53,7 +57,7 @@ async function main() {
       id: "tm1-user",
       name: "Test TM 1",
       email: "tm1@orbitask.com",
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "TEAM_MEMBER",
       approvalStatus: "APPROVED",
     },
@@ -62,7 +66,7 @@ async function main() {
   const teamMemberTwo = await prisma.user.upsert({
     where: { email: "tm2@orbitask.com" },
     update: {
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "TEAM_MEMBER",
       approvalStatus: "APPROVED",
     },
@@ -70,7 +74,7 @@ async function main() {
       id: "tm2-user",
       name: "Test TM 2",
       email: "tm2@orbitask.com",
-      password: hashedPassword,
+      password: userHashedPassword,
       role: "TEAM_MEMBER",
       approvalStatus: "APPROVED",
     },
