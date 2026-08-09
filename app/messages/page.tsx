@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Send,
@@ -14,6 +14,9 @@ import {
   Paperclip,
   X,
   FileText,
+  ArrowDown,
+  Eye,
+  Download,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getUserProjects } from '@/lib/actions/projects';
@@ -112,6 +115,16 @@ export default function MessagesPage() {
   const [replyingMsg, setReplyingMsg] = useState<ChatMessage | null>(null);
   const [selectedFile, setSelectedFile] = useState<{ fileName: string; fileUrl: string; fileType: string; fileSize: number } | null>(null);
   const [showEmojiMenuMsgId, setShowEmojiMenuMsgId] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null);
+
+  // Auto-scroll & New Message Notification refs and states
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [hasUnreadBelow, setHasUnreadBelow] = useState(false);
+  const prevMsgCountRef = useRef<number>(0);
+  const isInitialLoadRef = useRef<boolean>(true);
 
   const currentUserId = session?.user?.id;
 
@@ -120,11 +133,30 @@ export default function MessagesPage() {
     if (activeChannel.type === 'channel') {
       return activeChannel.name;
     }
-    // For DMs, create a deterministic key between current user and target user
     if (!currentUserId) return `dm_${activeChannel.id}`;
     const ids = [currentUserId, activeChannel.id].sort();
     return `dm_${ids[0]}_${ids[1]}`;
   }, [activeChannel, currentUserId]);
+
+  // Smooth / Immediate Scroll Helper
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
+    }
+  }, []);
+
+  // Track container scroll position to determine if user is near bottom
+  const handleScroll = useCallback(() => {
+    if (!messagesContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+    const nearBottom = distanceFromBottom < 120;
+    setIsNearBottom(nearBottom);
+
+    if (nearBottom) {
+      setHasUnreadBelow(false);
+    }
+  }, []);
 
   // Load channels & team members
   const loadChannelsAndUsers = useCallback(async () => {
@@ -145,8 +177,8 @@ export default function MessagesPage() {
 
       setProjects(Array.from(uniqueMap.values()));
       setUsers(usersData as WorkspaceUser[]);
-    } catch (err) {
-      console.error('Failed to load workspace channels:', err);
+    } catch {
+      // Handled gracefully
     }
     setLoadingChannels(false);
   }, []);
@@ -205,16 +237,48 @@ export default function MessagesPage() {
         };
       });
 
-      setMessages(formatted);
-    } catch (err) {
-      console.error('Failed to fetch channel messages from DB:', err);
+      setMessages(() => {
+        // Smart scroll calculation: check if new messages arrived
+        const prevCount = prevMsgCountRef.current;
+        const newCount = formatted.length;
+        prevMsgCountRef.current = newCount;
+
+        if (isInitialLoadRef.current) {
+          isInitialLoadRef.current = false;
+          setTimeout(() => scrollToBottom('auto'), 50);
+        } else if (newCount > prevCount) {
+          const lastMsg = formatted[formatted.length - 1];
+          if (lastMsg && (lastMsg.isSelf || isNearBottom)) {
+            setTimeout(() => scrollToBottom('smooth'), 50);
+            setHasUnreadBelow(false);
+          } else {
+            setHasUnreadBelow(true);
+          }
+        }
+
+        return formatted;
+      });
+    } catch {
+      // Handled gracefully
     }
-  }, [currentUserId, getChannelKey]);
+  }, [currentUserId, getChannelKey, isNearBottom, scrollToBottom]);
 
   const [mobileChatView, setMobileChatView] = useState(false);
 
+  // Switch channels: reset flags and auto-scroll to bottom
+  const handleSelectChannel = (channel: { id: string; name: string; type: 'channel' | 'dm' }) => {
+    setActiveChannel(channel);
+    setMobileChatView(true);
+    setHasUnreadBelow(false);
+    isInitialLoadRef.current = true;
+    prevMsgCountRef.current = 0;
+  };
+
   // Initial load and polling every 4 seconds for real-time updates
   useEffect(() => {
+    isInitialLoadRef.current = true;
+    prevMsgCountRef.current = 0;
+
     const t = setTimeout(() => {
       setLoadingMessages(true);
       void fetchMessagesForActiveChannel().finally(() => setLoadingMessages(false));
@@ -249,7 +313,10 @@ export default function MessagesPage() {
     setSending(false);
 
     if (res.success && res.message) {
-      void fetchMessagesForActiveChannel();
+      void fetchMessagesForActiveChannel().then(() => {
+        setTimeout(() => scrollToBottom('smooth'), 50);
+        setHasUnreadBelow(false);
+      });
     }
   };
 
@@ -286,6 +353,12 @@ export default function MessagesPage() {
     reader.readAsDataURL(file);
   };
 
+  const isImageAttachment = (fileType?: string, fileUrl?: string) => {
+    if (fileType && fileType.startsWith('image/')) return true;
+    if (fileUrl && (fileUrl.startsWith('data:image/') || /\.(png|jpe?g|gif|webp|svg)/i.test(fileUrl))) return true;
+    return false;
+  };
+
   const filteredProjects = projects.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
@@ -299,9 +372,13 @@ export default function MessagesPage() {
 
   return (
     <DashboardLayout title="Messages">
-      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[520px] grid grid-cols-1 md:grid-cols-4 transition-colors">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl shadow-xl overflow-hidden h-[calc(100vh-140px)] min-h-[500px] flex flex-col md:grid md:grid-cols-4 transition-colors relative">
         {/* Left Channels & DM List */}
-        <div className={`md:col-span-1 border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] p-4 flex-col justify-between overflow-y-auto ${mobileChatView ? 'hidden md:flex' : 'flex'}`}>
+        <div
+          className={`md:col-span-1 border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] p-4 flex-col justify-between overflow-y-auto ${
+            mobileChatView ? 'hidden md:flex' : 'flex flex-1 h-full'
+          }`}
+        >
           <div>
             <div className="relative mb-4">
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
@@ -327,10 +404,9 @@ export default function MessagesPage() {
               <div className="space-y-1 mb-6">
                 {showGeneral && (
                   <button
-                    onClick={() => {
-                      setActiveChannel({ id: 'general', name: 'general', type: 'channel' });
-                      setMobileChatView(true);
-                    }}
+                    onClick={() =>
+                      handleSelectChannel({ id: 'general', name: 'general', type: 'channel' })
+                    }
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       activeChannel.name === 'general' && activeChannel.type === 'channel'
                         ? 'bg-[#4E75FF] text-white shadow-md'
@@ -345,10 +421,9 @@ export default function MessagesPage() {
                 {filteredProjects.map((proj) => (
                   <button
                     key={proj.id}
-                    onClick={() => {
-                      setActiveChannel({ id: proj.id, name: proj.name, type: 'channel' });
-                      setMobileChatView(true);
-                    }}
+                    onClick={() =>
+                      handleSelectChannel({ id: proj.id, name: proj.name, type: 'channel' })
+                    }
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all truncate cursor-pointer ${
                       activeChannel.name === proj.name && activeChannel.type === 'channel'
                         ? 'bg-[#4E75FF] text-white shadow-md'
@@ -378,14 +453,13 @@ export default function MessagesPage() {
                   return (
                     <div
                       key={member.id}
-                      onClick={() => {
-                        setActiveChannel({
+                      onClick={() =>
+                        handleSelectChannel({
                           id: member.id,
                           name: member.name,
                           type: 'dm',
-                        });
-                        setMobileChatView(true);
-                      }}
+                        })
+                      }
                       className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors ${
                         isSelected ? 'bg-[#5B82FF]/15 border border-[#5B82FF]/40' : 'hover:bg-[var(--bg-card-hover)]'
                       }`}
@@ -408,9 +482,13 @@ export default function MessagesPage() {
         </div>
 
         {/* Right Active Chat View */}
-        <div className={`md:col-span-3 flex-col justify-between bg-[var(--bg-card)] ${!mobileChatView ? 'hidden md:flex' : 'flex'}`}>
+        <div
+          className={`md:col-span-3 flex flex-col h-full max-h-full overflow-hidden bg-[var(--bg-card)] relative ${
+            !mobileChatView ? 'hidden md:flex' : 'flex flex-1'
+          }`}
+        >
           {/* Chat Header */}
-          <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+          <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between shrink-0 bg-[var(--bg-card)] z-10">
             <div className="flex items-center gap-2 min-w-0">
               <button
                 onClick={() => setMobileChatView(false)}
@@ -429,8 +507,12 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          {/* Messages Stream */}
-          <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4">
+          {/* Messages Stream (Strictly Scrollable Area) */}
+          <div
+            ref={messagesContainerRef}
+            onScroll={handleScroll}
+            className="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 min-h-0 relative"
+          >
             {loadingMessages ? (
               <div className="py-16 text-center text-xs text-[var(--text-secondary)] flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-[#4E75FF]" />
@@ -443,7 +525,6 @@ export default function MessagesPage() {
               </div>
             ) : (
               messages.map((msg) => {
-                // Group reactions by emoji
                 const reactionGroups: Record<string, { count: number; users: string[]; hasReacted: boolean }> = {};
                 msg.reactions.forEach((r) => {
                   if (!reactionGroups[r.emoji]) {
@@ -470,7 +551,7 @@ export default function MessagesPage() {
                     </div>
 
                     <div className="relative max-w-md space-y-1">
-                      {/* Action Menu (Reply, React, Delete) */}
+                      {/* Action Menu */}
                       {!msg.isDeleted && (
                         <div
                           className={`absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-1 flex items-center gap-1 z-10 shadow-lg ${
@@ -495,7 +576,6 @@ export default function MessagesPage() {
                               <Smile className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Emoji Picker Popup */}
                             {showEmojiMenuMsgId === msg.id && (
                               <div className="absolute bottom-full mb-2 left-0 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-2 flex gap-1 shadow-2xl z-20">
                                 {EMOJI_LIST.map((emoji) => (
@@ -537,7 +617,7 @@ export default function MessagesPage() {
 
                       {/* Main Message Bubble */}
                       <div
-                        className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                        className={`p-3.5 rounded-2xl text-xs leading-relaxed break-words ${
                           msg.isDeleted
                             ? 'bg-[var(--bg-card-hover)] text-[var(--text-muted)] italic border border-[var(--border-color)]'
                             : msg.isSelf
@@ -560,24 +640,50 @@ export default function MessagesPage() {
 
                         {/* File Attachments */}
                         {msg.attachments.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {msg.attachments.map((att) => (
-                              <a
-                                key={att.id}
-                                href={att.fileUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="flex items-center gap-2 p-2 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-[#5B82FF] transition-colors"
-                              >
-                                <FileText className="w-4 h-4 text-[#5B82FF] shrink-0" />
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-[11px] font-semibold truncate">{att.fileName}</p>
-                                  <p className="text-[9px] text-[var(--text-secondary)]">
-                                    {(att.fileSize / 1024).toFixed(1)} KB
-                                  </p>
-                                </div>
-                              </a>
-                            ))}
+                          <div className="mt-2.5 space-y-2">
+                            {msg.attachments.map((att) => {
+                              const isImg = isImageAttachment(att.fileType, att.fileUrl);
+
+                              if (isImg) {
+                                return (
+                                  <div
+                                    key={att.id}
+                                    onClick={() => setLightboxImage({ url: att.fileUrl, name: att.fileName })}
+                                    className="relative rounded-xl overflow-hidden border border-[var(--border-color)] cursor-pointer group max-w-xs bg-black/20"
+                                  >
+                                    <img
+                                      src={att.fileUrl}
+                                      alt={att.fileName}
+                                      className="w-full max-h-48 object-cover group-hover:scale-105 transition-transform"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5">
+                                      <Eye className="w-4 h-4" />
+                                      <span>Preview Image</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              return (
+                                <a
+                                  key={att.id}
+                                  href={att.fileUrl}
+                                  download={att.fileName}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-[#5B82FF] transition-colors"
+                                >
+                                  <FileText className="w-4 h-4 text-[#5B82FF] shrink-0" />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-[11px] font-semibold truncate">{att.fileName}</p>
+                                    <p className="text-[9px] text-[var(--text-secondary)]">
+                                      {(att.fileSize / 1024).toFixed(1)} KB
+                                    </p>
+                                  </div>
+                                  <Download className="w-3.5 h-3.5 text-[var(--text-secondary)] shrink-0" />
+                                </a>
+                              );
+                            })}
                           </div>
                         )}
 
@@ -614,10 +720,28 @@ export default function MessagesPage() {
                 );
               })
             )}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Form & Composer */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-2">
+          {/* Floating New Messages Indicator */}
+          {hasUnreadBelow && (
+            <button
+              onClick={() => {
+                scrollToBottom('smooth');
+                setHasUnreadBelow(false);
+              }}
+              className="absolute bottom-20 right-6 z-30 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#4E75FF] hover:bg-[#5B82FF] text-white text-xs font-semibold shadow-xl transition-all animate-bounce cursor-pointer"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+              <span>New messages</span>
+            </button>
+          )}
+
+          {/* Input Form & Composer (Sticky Bottom) */}
+          <form
+            onSubmit={handleSendMessage}
+            className="p-3 sm:p-4 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-2 shrink-0 z-10"
+          >
             {/* Replying Preview Banner */}
             {replyingMsg && (
               <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#5B82FF]/10 border border-[#5B82FF]/40 text-xs">
@@ -682,7 +806,7 @@ export default function MessagesPage() {
                     ? `Message #${activeChannel.name}...`
                     : `Message ${activeChannel.name}...`
                 }
-                className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] disabled:opacity-50"
+                className="flex-1 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] disabled:opacity-50 min-w-0"
               />
               <button
                 type="submit"
@@ -699,6 +823,38 @@ export default function MessagesPage() {
           </form>
         </div>
       </div>
+
+      {/* Image Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          onClick={() => setLightboxImage(null)}
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-xs transition-opacity"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-4xl w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-2xl p-4 space-y-3"
+          >
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+              <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                {lightboxImage.name}
+              </span>
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="p-1 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="max-h-[75vh] overflow-auto flex items-center justify-center bg-black/30 rounded-xl p-2">
+              <img
+                src={lightboxImage.url}
+                alt={lightboxImage.name}
+                className="max-h-[70vh] w-auto object-contain rounded-lg shadow-md"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
