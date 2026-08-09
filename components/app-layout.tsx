@@ -32,7 +32,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     setMobileOpen(false);
   }, []);
 
-  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isAuthPage =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
 
   if (isAuthPage) {
     return <>{children}</>;

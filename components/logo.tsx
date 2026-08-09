@@ -39,7 +39,7 @@ export function OrbitaskLogo({
 
       {showText && (
         <span
-          className={`font-extrabold tracking-tight text-white ${textClass} group-hover:text-[#5B82FF] transition-colors`}
+          className={`font-extrabold tracking-tight text-[var(--text-primary)] ${textClass} group-hover:text-[#5B82FF] transition-colors`}
         >
           Orbitask
         </span>
