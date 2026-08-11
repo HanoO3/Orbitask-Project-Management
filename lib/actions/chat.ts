@@ -108,6 +108,44 @@ export async function getChannelMessages(channel: string) {
   }
 }
 
+export async function getUnreadCountsForChannels(
+  channelKeys: string[],
+  lastReadMap: Record<string, string>
+) {
+  const session = await auth();
+  if (!session?.user?.id || !channelKeys.length) {
+    return {};
+  }
+
+  const userId = session.user.id;
+  const counts: Record<string, number> = {};
+
+  try {
+    await Promise.all(
+      channelKeys.map(async (key) => {
+        const lastReadIso = lastReadMap[key];
+        const lastRead = lastReadIso ? new Date(lastReadIso) : new Date(0);
+
+        const count = await prisma.chatMessage.count({
+          where: {
+            channel: key,
+            isDeleted: false,
+            senderId: { not: userId },
+            createdAt: { gt: lastRead },
+          },
+        });
+
+        counts[key] = count;
+      })
+    );
+
+    return counts;
+  } catch (err) {
+    console.error("getUnreadCountsForChannels error:", err);
+    return {};
+  }
+}
+
 export async function deleteChatMessage(messageId: string) {
   const session = await auth();
   if (!session?.user?.id) {
