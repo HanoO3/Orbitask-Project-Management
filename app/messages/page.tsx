@@ -134,6 +134,11 @@ export default function MessagesPage() {
     }
   });
 
+  const lastReadMapRef = useRef<Record<string, string>>(lastReadMap);
+  useEffect(() => {
+    lastReadMapRef.current = lastReadMap;
+  }, [lastReadMap]);
+
   // Auto-scroll & New Message Notification refs and states
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -145,9 +150,10 @@ export default function MessagesPage() {
 
   const currentUserId = session?.user?.id;
 
-  // Save lastReadMap helper
+  // Save lastReadMap helper (syncs both ref & state)
   const markChannelAsRead = useCallback((key: string) => {
     const nowIso = new Date().toISOString();
+    lastReadMapRef.current[key] = nowIso;
     setLastReadMap((prev) => {
       const updated = { ...prev, [key]: nowIso };
       try {
@@ -236,10 +242,10 @@ export default function MessagesPage() {
   const fetchMessagesForActiveChannel = useCallback(async () => {
     if (!currentUserId) return;
     const channelKey = getChannelKey();
-    markChannelAsRead(channelKey);
 
     try {
       const dbMsgs = await getChannelMessages(channelKey);
+      markChannelAsRead(channelKey);
 
       // Exclude deleted messages cleanly so no "This message was deleted" bubble appears
       const formatted: ChatMessage[] = (dbMsgs as Array<Record<string, unknown>>)
@@ -311,7 +317,7 @@ export default function MessagesPage() {
     }
   }, [currentUserId, getChannelKey, isNearBottom, markChannelAsRead, scrollToBottom]);
 
-  // Periodically fetch unread counts for all other channels & DMs
+  // Periodically fetch unread counts for all other channels & DMs (uses lastReadMapRef to avoid re-triggering effects)
   const fetchUnreadCounts = useCallback(async () => {
     if (!currentUserId) return;
     const channelKeys: string[] = ['general'];
@@ -324,17 +330,18 @@ export default function MessagesPage() {
     });
 
     const activeKey = getChannelKey();
-    const mapCopy = { ...lastReadMap, [activeKey]: new Date().toISOString() };
+    const mapCopy = { ...lastReadMapRef.current, [activeKey]: new Date().toISOString() };
 
     const counts = await getUnreadCountsForChannels(channelKeys, mapCopy);
     setUnreadCounts(counts);
-  }, [currentUserId, getChannelKey, lastReadMap, projects, users]);
+  }, [currentUserId, getChannelKey, projects, users]);
 
   const [mobileChatView, setMobileChatView] = useState(false);
 
   // Switch channels: mark as read, reset flags and auto-scroll to bottom
   const handleSelectChannel = (channel: { id: string; name: string; type: 'channel' | 'dm' }) => {
     setActiveChannel(channel);
+    setLoadingMessages(true);
     setMobileChatView(true);
     setHasUnreadBelow(false);
     isInitialLoadRef.current = true;
@@ -350,13 +357,12 @@ export default function MessagesPage() {
     markChannelAsRead(key);
   };
 
-  // Initial load and polling every 4 seconds for real-time updates & unread counts
+  // Channel switch & background polling (Optimized lifecycle: 0 effect cascade loops)
   useEffect(() => {
     isInitialLoadRef.current = true;
     prevMsgCountRef.current = 0;
 
     const t = setTimeout(() => {
-      setLoadingMessages(true);
       void fetchMessagesForActiveChannel().finally(() => setLoadingMessages(false));
       void fetchUnreadCounts();
     }, 0);
@@ -370,7 +376,7 @@ export default function MessagesPage() {
       clearTimeout(t);
       clearInterval(interval);
     };
-  }, [fetchMessagesForActiveChannel, fetchUnreadCounts]);
+  }, [activeChannel.id, activeChannel.type, currentUserId, fetchMessagesForActiveChannel, fetchUnreadCounts]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -766,6 +772,7 @@ export default function MessagesPage() {
                                     onClick={() => setLightboxImage({ url: att.fileUrl, name: att.fileName })}
                                     className="relative rounded-xl overflow-hidden border border-[var(--border-color)] cursor-pointer group max-w-xs bg-black/20"
                                   >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       src={att.fileUrl}
                                       alt={att.fileName}
@@ -1034,6 +1041,7 @@ export default function MessagesPage() {
               </button>
             </div>
             <div className="max-h-[75vh] overflow-auto flex items-center justify-center bg-black/30 rounded-xl p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={lightboxImage.url}
                 alt={lightboxImage.name}

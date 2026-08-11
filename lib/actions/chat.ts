@@ -121,23 +121,29 @@ export async function getUnreadCountsForChannels(
   const counts: Record<string, number> = {};
 
   try {
-    await Promise.all(
-      channelKeys.map(async (key) => {
-        const lastReadIso = lastReadMap[key];
-        const lastRead = lastReadIso ? new Date(lastReadIso) : new Date(0);
+    // Single aggregated query to fetch all unread messages for all channels at once
+    const unreadMsgs = await prisma.chatMessage.findMany({
+      where: {
+        channel: { in: channelKeys },
+        isDeleted: false,
+        senderId: { not: userId },
+      },
+      select: {
+        channel: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 300,
+    });
 
-        const count = await prisma.chatMessage.count({
-          where: {
-            channel: key,
-            isDeleted: false,
-            senderId: { not: userId },
-            createdAt: { gt: lastRead },
-          },
-        });
+    for (const msg of unreadMsgs) {
+      const lastReadIso = lastReadMap[msg.channel];
+      const lastRead = lastReadIso ? new Date(lastReadIso) : new Date(0);
 
-        counts[key] = count;
-      })
-    );
+      if (msg.createdAt > lastRead) {
+        counts[msg.channel] = (counts[msg.channel] || 0) + 1;
+      }
+    }
 
     return counts;
   } catch (err) {
