@@ -23,7 +23,6 @@ function LoginFormContent() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
@@ -40,9 +39,8 @@ function LoginFormContent() {
         redirect: false,
       });
 
-      setLoading(false);
-
       if (res?.error) {
+        setLoading(false);
         if (res.error.includes('PendingApproval') || res.error.includes('Pending')) {
           setError('Your account is pending administrator approval.');
         } else if (res.error.includes('AccountRejected') || res.error.includes('Rejected')) {
@@ -126,18 +124,8 @@ function LoginFormContent() {
                 required
               />
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 text-[var(--text-secondary)] cursor-pointer hover:text-[var(--text-primary)] transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-[var(--border-color)] bg-[var(--bg-input)] text-[#4E75FF] focus:ring-0 accent-[#4E75FF]"
-                  />
-                  <span>Remember me</span>
-                </label>
-
+              {/* Forgot Password */}
+              <div className="flex justify-end text-xs pt-1">
                 <Link href="/forgot-password" className="text-[#5B82FF] hover:underline font-medium">
                   Forgot password?
                 </Link>

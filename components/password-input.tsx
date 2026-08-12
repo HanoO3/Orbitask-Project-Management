@@ -41,9 +41,9 @@ export function PasswordInput({
         </label>
       )}
 
-      <div className="relative">
+      <div className="relative flex items-center">
         {showLockIcon && (
-          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+          <Lock className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none z-10" />
         )}
 
         <input
@@ -55,17 +55,16 @@ export function PasswordInput({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
-          className={`w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl py-2.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all disabled:opacity-50 ${
-            showLockIcon ? 'pl-10' : 'pl-3.5'
-          } pr-10 ${className}`}
+          className={`w-full bg-[var(--bg-input)] border border-[var(--border-color)] rounded-xl ${
+            showLockIcon ? 'pl-11' : 'pl-4'
+          } pr-11 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#5B82FF] focus:ring-1 focus:ring-[#5B82FF] transition-all disabled:opacity-50 ${className}`}
         />
 
         <button
           type="button"
           onClick={togglePasswordVisibility}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
-          tabIndex={0}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-md transition-colors cursor-pointer focus:outline-none"
+          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#5B82FF]/50"
         >
           {showPassword ? (
             <EyeOff className="w-4 h-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]" />
@@ -81,3 +80,5 @@ export function PasswordInput({
     </div>
   );
 }
+
+
