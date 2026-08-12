@@ -89,7 +89,16 @@ export async function getUserProjects() {
     }
 
     return {
-      ...p,
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      startDate: p.startDate ? new Date(p.startDate).toISOString() : '',
+      endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
+      priority: p.priority,
+      status: p.status,
+      manager: p.manager,
+      members: p.members,
+      tasks: p.tasks,
       progress,
       displayStatus,
     };

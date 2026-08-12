@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { getUsers, deleteUser, approveUser, rejectUser } from "@/lib/actions/users";
 import { UserModal } from "@/components/user-modal";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -12,13 +13,16 @@ type User = {
   email: string;
   role: "ADMIN" | "PROJECT_MANAGER" | "TEAM_MEMBER";
   approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
-  createdAt: Date;
+  createdAt: string | Date;
 };
 
-export default function UsersPage() {
+function UsersContent() {
+  const searchParams = useSearchParams();
+  const initialRole = searchParams.get("role") || "ALL";
+
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [roleFilter, setRoleFilter] = useState(initialRole);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState<'name' | 'role' | 'approvalStatus'>('name');
   const [modalOpen, setModalOpen] = useState(false);
@@ -252,5 +256,13 @@ export default function UsersPage() {
 
       <UserModal isOpen={modalOpen} onClose={handleModalClose} editingUser={editingUser} />
     </div>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[var(--text-secondary)] text-xs">Loading user management...</div>}>
+      <UsersContent />
+    </Suspense>
   );
 }

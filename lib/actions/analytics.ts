@@ -87,7 +87,7 @@ export async function getAnalyticsData() {
       id: t.id,
       title: t.title,
       projectName: t.project.name,
-      dueDate: t.dueDate,
+      dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : '',
       priority: t.priority,
       assigneeName: t.assignee?.name || "Unassigned",
     }));

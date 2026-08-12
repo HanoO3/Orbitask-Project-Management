@@ -101,7 +101,24 @@ export async function getChannelMessages(channel: string) {
       take: 100,
     });
 
-    return messages;
+    return messages.map((msg) => ({
+      ...msg,
+      createdAt: msg.createdAt ? new Date(msg.createdAt).toISOString() : '',
+      reactions: msg.reactions.map((r) => ({
+        ...r,
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : '',
+      })),
+      attachments: msg.attachments.map((a) => ({
+        ...a,
+        createdAt: a.createdAt ? new Date(a.createdAt).toISOString() : '',
+      })),
+      replyTo: msg.replyTo
+        ? {
+            ...msg.replyTo,
+            createdAt: msg.replyTo.createdAt ? new Date(msg.replyTo.createdAt).toISOString() : '',
+          }
+        : null,
+    }));
   } catch (err) {
     console.error("getChannelMessages error:", err);
     return [];
@@ -113,7 +130,7 @@ export async function getUnreadCountsForChannels(
   lastReadMap: Record<string, string>
 ) {
   const session = await auth();
-  if (!session?.user?.id || !channelKeys.length) {
+  if (!session?.user?.id) {
     return {};
   }
 
@@ -121,10 +138,14 @@ export async function getUnreadCountsForChannels(
   const counts: Record<string, number> = {};
 
   try {
-    // Single aggregated query to fetch all unread messages for all channels at once
+    // Aggregated query to fetch unread messages for public channels & any DMs involving userId
     const unreadMsgs = await prisma.chatMessage.findMany({
       where: {
-        channel: { in: channelKeys },
+        OR: [
+          { channel: { in: channelKeys.length ? channelKeys : ["general"] } },
+          { channel: { contains: `dm_${userId}` } },
+          { channel: { contains: `_${userId}` } },
+        ],
         isDeleted: false,
         senderId: { not: userId },
       },
@@ -138,9 +159,10 @@ export async function getUnreadCountsForChannels(
 
     for (const msg of unreadMsgs) {
       const lastReadIso = lastReadMap[msg.channel];
-      const lastRead = lastReadIso ? new Date(lastReadIso) : new Date(0);
+      const lastReadTime = lastReadIso ? new Date(lastReadIso).getTime() : 0;
+      const msgTime = new Date(msg.createdAt).getTime();
 
-      if (msg.createdAt > lastRead) {
+      if (msgTime > lastReadTime) {
         counts[msg.channel] = (counts[msg.channel] || 0) + 1;
       }
     }

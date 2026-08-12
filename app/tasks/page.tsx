@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search, Clock, Check, Loader2, CheckCircle2 } from 'lucide-react';
@@ -47,10 +48,24 @@ function isOverdue(dueDate: string | Date, status: string) {
   return target < today;
 }
 
-export default function TasksPage() {
+function TasksContent() {
+  const searchParams = useSearchParams();
+  const queryStatus = searchParams.get('status');
+  const queryPriority = searchParams.get('priority');
+
+  const initialTab = queryStatus === 'IN_PROGRESS'
+    ? 'In Progress'
+    : queryStatus === 'COMPLETED'
+    ? 'Completed'
+    : queryStatus === 'TODO'
+    ? 'To Do'
+    : queryStatus === 'REVIEW'
+    ? 'Review'
+    : 'All';
+
   const [tasks, setTasks] = useState<RealTask[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('All');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
@@ -106,7 +121,13 @@ export default function TasksPage() {
       const taskIsCompleted = t.status === 'COMPLETED';
       const taskIsOverdue = isOverdue(t.dueDate, t.status);
 
-      if (activeTab === 'In Progress') return matchesSearch && !taskIsCompleted && !taskIsOverdue;
+      if (queryPriority && t.priority !== queryPriority) {
+        return false;
+      }
+
+      if (activeTab === 'In Progress') return matchesSearch && t.status === 'IN_PROGRESS';
+      if (activeTab === 'To Do') return matchesSearch && t.status === 'TODO';
+      if (activeTab === 'Review') return matchesSearch && t.status === 'REVIEW';
       if (activeTab === 'Overdue') return matchesSearch && taskIsOverdue;
       if (activeTab === 'Completed') return matchesSearch && taskIsCompleted;
 
@@ -188,7 +209,7 @@ export default function TasksPage() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-3 overflow-x-auto max-w-full scrollbar-none">
-        {['All', 'In Progress', 'Overdue', 'Completed'].map((tab) => (
+        {['All', 'To Do', 'In Progress', 'Review', 'Overdue', 'Completed'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -288,5 +309,13 @@ export default function TasksPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-[var(--text-secondary)] text-xs">Loading tasks...</div>}>
+      <TasksContent />
+    </Suspense>
   );
 }

@@ -51,7 +51,6 @@ function LoginFormContent() {
           setError('Invalid email address or password.');
         }
       } else {
-        // Successful login, refresh router and navigate to dashboard
         router.push('/dashboard');
         router.refresh();
       }

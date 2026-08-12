@@ -13,6 +13,8 @@ import {
 } from '@/lib/actions/notifications';
 import { Bell, X } from 'lucide-react';
 
+import { useChatUnread } from '@/components/providers/chat-unread-context';
+
 type Notification = {
   id: string;
   type: string;
@@ -38,6 +40,9 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { totalUnreadChatCount } = useChatUnread();
+
+  const totalCombinedUnread = unreadCount + totalUnreadChatCount;
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -107,9 +112,9 @@ export function NotificationBell() {
         className="relative p-2 rounded-full hover:bg-[var(--bg-card-hover)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
       >
         <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
+        {totalCombinedUnread > 0 && (
           <span className="absolute top-1 right-1 bg-[#5B82FF] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center ring-2 ring-[var(--bg-main)] animate-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {totalCombinedUnread > 9 ? '9+' : totalCombinedUnread}
           </span>
         )}
       </button>
@@ -133,6 +138,24 @@ export function NotificationBell() {
           </div>
 
           <div className="max-h-96 overflow-y-auto divide-y divide-[var(--border-color)]">
+            {totalUnreadChatCount > 0 && (
+              <div
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/messages');
+                }}
+                className="w-full text-left px-4 py-3 bg-[#5B82FF]/15 hover:bg-[#5B82FF]/25 border-b border-[var(--border-color)] transition-colors flex gap-3 items-center cursor-pointer"
+              >
+                <span className="text-base shrink-0">💬</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-[var(--text-primary)]">
+                    You have {totalUnreadChatCount} unread chat message{totalUnreadChatCount > 1 ? 's' : ''}
+                  </p>
+                  <p className="text-[10px] text-[#5B82FF] font-semibold">Click to open Messages</p>
+                </div>
+                <span className="w-2 h-2 bg-[#5B82FF] rounded-full shrink-0" title="Unread chat messages" />
+              </div>
+            )}
             {notifications.length === 0 ? (
               <div className="text-[var(--text-secondary)] text-xs text-center py-8">
                 No notifications yet

@@ -48,7 +48,7 @@ export async function getProjectActivities(projectId: string) {
     }
   }
 
-  return prisma.activity.findMany({
+  const activities = await prisma.activity.findMany({
     where: { projectId },
     orderBy: { createdAt: "desc" },
     take: 30,
@@ -57,6 +57,11 @@ export async function getProjectActivities(projectId: string) {
       task: { select: { id: true, title: true } },
     },
   });
+
+  return activities.map((a) => ({
+    ...a,
+    createdAt: a.createdAt ? new Date(a.createdAt).toISOString() : '',
+  }));
 }
 
 export async function getSystemActivities() {
@@ -82,7 +87,7 @@ export async function getSystemActivities() {
     };
   }
 
-  return prisma.activity.findMany({
+  const activities = await prisma.activity.findMany({
     where: whereClause,
     orderBy: { createdAt: "desc" },
     take: 20,
@@ -92,4 +97,9 @@ export async function getSystemActivities() {
       task: { select: { id: true, title: true } },
     },
   });
+
+  return activities.map((a) => ({
+    ...a,
+    createdAt: a.createdAt ? new Date(a.createdAt).toISOString() : '',
+  }));
 }

@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState, use, useCallback } from 'react';
-import Link from 'next/link';
 import { getTaskDetail, addTaskComment } from '@/lib/actions/task-comments';
+import { BackButton } from '@/components/back-button';
 import { NotificationBell } from '@/components/notification-bell';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 
 type Comment = {
   id: string;
@@ -98,10 +98,8 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8 space-y-6 w-full max-w-full overflow-x-hidden transition-colors">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <Link href="/tasks" className="flex items-center gap-2 text-xs font-semibold text-[#5B82FF] hover:underline">
-            <ArrowLeft className="w-4 h-4" /> Back to Tasks
-          </Link>
+        <div className="flex justify-between items-center flex-wrap gap-3">
+          <BackButton href="/tasks" label="Back to Tasks" />
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <NotificationBell />

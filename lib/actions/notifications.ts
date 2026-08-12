@@ -24,11 +24,16 @@ export async function getMyNotifications() {
     console.error("Deadline check error:", err);
   }
 
-  return prisma.notification.findMany({
+  const notifs = await prisma.notification.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
     take: 20,
   });
+
+  return notifs.map((n) => ({
+    ...n,
+    createdAt: n.createdAt ? new Date(n.createdAt).toISOString() : '',
+  }));
 }
 
 export async function getUnreadCount() {

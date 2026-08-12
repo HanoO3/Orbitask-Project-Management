@@ -6,8 +6,8 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "Admin@123";
-  const userPassword = process.env.SEED_USER_PASSWORD || "Admin@123";
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || "admin123";
+  const userPassword = process.env.SEED_USER_PASSWORD || "test123";
 
   const adminHashedPassword = await bcrypt.hash(adminPassword, 10);
   const userHashedPassword = await bcrypt.hash(userPassword, 10);
@@ -74,6 +74,23 @@ async function main() {
       id: "tm2-user",
       name: "Test TM 2",
       email: "tm2@orbitask.com",
+      password: userHashedPassword,
+      role: "TEAM_MEMBER",
+      approvalStatus: "APPROVED",
+    },
+  });
+
+  const teamMemberMain = await prisma.user.upsert({
+    where: { email: "tm@orbitask.com" },
+    update: {
+      password: userHashedPassword,
+      role: "TEAM_MEMBER",
+      approvalStatus: "APPROVED",
+    },
+    create: {
+      id: "tm-user",
+      name: "Test TM",
+      email: "tm@orbitask.com",
       password: userHashedPassword,
       role: "TEAM_MEMBER",
       approvalStatus: "APPROVED",
@@ -177,6 +194,15 @@ async function main() {
         userId: teamMemberTwo.id,
       },
     });
+
+    await prisma.projectMember.upsert({
+      where: { projectId_userId: { projectId: proj.id, userId: teamMemberMain.id } },
+      update: {},
+      create: {
+        projectId: proj.id,
+        userId: teamMemberMain.id,
+      },
+    });
   }
 
   // Tasks for Project 1: Student Attendance Tracking System
@@ -239,7 +265,7 @@ async function main() {
       status: "TODO",
       dueDate: new Date("2026-08-14T17:00:00.000Z"),
       projectId: p1.id,
-      assigneeId: teamMemberOne.id,
+      assigneeId: teamMemberMain.id,
       creatorId: projectManager.id,
     },
     create: {
@@ -250,7 +276,7 @@ async function main() {
       status: "TODO",
       dueDate: new Date("2026-08-14T17:00:00.000Z"),
       project: { connect: { id: p1.id } },
-      assignee: { connect: { id: teamMemberOne.id } },
+      assignee: { connect: { id: teamMemberMain.id } },
       creator: { connect: { id: projectManager.id } },
     },
   });
@@ -315,7 +341,7 @@ async function main() {
       status: "TODO",
       dueDate: new Date("2026-08-22T17:00:00.000Z"),
       projectId: p2.id,
-      assigneeId: teamMemberOne.id,
+      assigneeId: teamMemberMain.id,
       creatorId: projectManager.id,
     },
     create: {
@@ -326,7 +352,7 @@ async function main() {
       status: "TODO",
       dueDate: new Date("2026-08-22T17:00:00.000Z"),
       project: { connect: { id: p2.id } },
-      assignee: { connect: { id: teamMemberOne.id } },
+      assignee: { connect: { id: teamMemberMain.id } },
       creator: { connect: { id: projectManager.id } },
     },
   });

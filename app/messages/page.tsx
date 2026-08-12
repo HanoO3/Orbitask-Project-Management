@@ -24,11 +24,12 @@ import { getUserProjects } from '@/lib/actions/projects';
 import { getWorkspaceUsers } from '@/lib/actions/users';
 import {
   getChannelMessages,
-  getUnreadCountsForChannels,
   sendChatMessage,
   deleteChatMessage,
   toggleMessageReaction,
 } from '@/lib/actions/chat';
+
+import { useChatUnread } from '@/components/providers/chat-unread-context';
 
 type WorkspaceUser = {
   id: string;
@@ -95,8 +96,6 @@ const colorPalette = [
 
 const EMOJI_LIST = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
 
-const LAST_READ_KEY = 'orbitask_chat_last_read_map';
-
 export default function MessagesPage() {
   const { data: session } = useSession();
   const [loadingChannels, setLoadingChannels] = useState(true);
@@ -122,22 +121,12 @@ export default function MessagesPage() {
   const [mobileActionMenuMsgId, setMobileActionMenuMsgId] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null);
 
-  // Unread badge counts state with lazy initial state from localStorage
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
-  const [lastReadMap, setLastReadMap] = useState<Record<string, string>>(() => {
-    if (typeof window === 'undefined') return {};
-    try {
-      const stored = localStorage.getItem(LAST_READ_KEY);
-      return stored ? (JSON.parse(stored) as Record<string, string>) : {};
-    } catch {
-      return {};
-    }
-  });
+  // Unread badge counts context
+  const { unreadCounts, markChannelAsRead, refreshUnreadCounts } = useChatUnread();
 
-  const lastReadMapRef = useRef<Record<string, string>>(lastReadMap);
-  useEffect(() => {
-    lastReadMapRef.current = lastReadMap;
-  }, [lastReadMap]);
+  // Request flight locks & stale request cancellation refs
+  const isFetchingRef = useRef(false);
+  const activeChannelKeyRef = useRef<string>('general');
 
   // Auto-scroll & New Message Notification refs and states
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -150,23 +139,7 @@ export default function MessagesPage() {
 
   const currentUserId = session?.user?.id;
 
-  // Save lastReadMap helper (syncs both ref & state)
-  const markChannelAsRead = useCallback((key: string) => {
-    const nowIso = new Date().toISOString();
-    lastReadMapRef.current[key] = nowIso;
-    setLastReadMap((prev) => {
-      const updated = { ...prev, [key]: nowIso };
-      try {
-        localStorage.setItem(LAST_READ_KEY, JSON.stringify(updated));
-      } catch {
-        // Handled gracefully
-      }
-      return updated;
-    });
-    setUnreadCounts((prev) => ({ ...prev, [key]: 0 }));
-  }, []);
-
-  // Derive target channel string for backend database
+  // Derive target channel string for backend database (Guaranteed Symmetrical DM keys)
   const getChannelKey = useCallback(() => {
     if (activeChannel.type === 'channel') {
       return activeChannel.name;
@@ -175,6 +148,11 @@ export default function MessagesPage() {
     const ids = [currentUserId, activeChannel.id].sort();
     return `dm_${ids[0]}_${ids[1]}`;
   }, [activeChannel, currentUserId]);
+
+  // Keep activeChannelKeyRef in sync with getChannelKey
+  useEffect(() => {
+    activeChannelKeyRef.current = getChannelKey();
+  }, [getChannelKey]);
 
   // Smooth / Immediate Scroll Helper
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -238,16 +216,23 @@ export default function MessagesPage() {
     return () => clearTimeout(t);
   }, [loadChannelsAndUsers]);
 
-  // Fetch real messages for active channel from Prisma Database
-  const fetchMessagesForActiveChannel = useCallback(async () => {
-    if (!currentUserId) return;
-    const channelKey = getChannelKey();
+  // Fetch real messages for active channel with In-Flight Locking & Stale Response Discarding
+  const fetchMessagesForActiveChannel = useCallback(async (force = false) => {
+    if (!currentUserId || (!force && isFetchingRef.current)) return;
+    const requestKey = getChannelKey();
+    isFetchingRef.current = true;
 
     try {
-      const dbMsgs = await getChannelMessages(channelKey);
-      markChannelAsRead(channelKey);
+      const dbMsgs = await getChannelMessages(requestKey);
+      
+      // If user switched channels while this request was in-flight, discard stale result
+      if (activeChannelKeyRef.current !== requestKey) {
+        return;
+      }
 
-      // Exclude deleted messages cleanly so no "This message was deleted" bubble appears
+      markChannelAsRead(requestKey);
+
+      // Exclude deleted messages cleanly
       const formatted: ChatMessage[] = (dbMsgs as Array<Record<string, unknown>>)
         .filter((m) => !(m.isDeleted as boolean))
         .map((m) => {
@@ -314,31 +299,14 @@ export default function MessagesPage() {
       });
     } catch {
       // Handled gracefully
+    } finally {
+      isFetchingRef.current = false;
     }
   }, [currentUserId, getChannelKey, isNearBottom, markChannelAsRead, scrollToBottom]);
 
-  // Periodically fetch unread counts for all other channels & DMs (uses lastReadMapRef to avoid re-triggering effects)
-  const fetchUnreadCounts = useCallback(async () => {
-    if (!currentUserId) return;
-    const channelKeys: string[] = ['general'];
-    projects.forEach((p) => channelKeys.push(p.name));
-    users.forEach((u) => {
-      if (u.id !== currentUserId) {
-        const ids = [currentUserId, u.id].sort();
-        channelKeys.push(`dm_${ids[0]}_${ids[1]}`);
-      }
-    });
-
-    const activeKey = getChannelKey();
-    const mapCopy = { ...lastReadMapRef.current, [activeKey]: new Date().toISOString() };
-
-    const counts = await getUnreadCountsForChannels(channelKeys, mapCopy);
-    setUnreadCounts(counts);
-  }, [currentUserId, getChannelKey, projects, users]);
-
   const [mobileChatView, setMobileChatView] = useState(false);
 
-  // Switch channels: mark as read, reset flags and auto-scroll to bottom
+  // Switch channels: mark as read, reset flags and set loading state
   const handleSelectChannel = (channel: { id: string; name: string; type: 'channel' | 'dm' }) => {
     setActiveChannel(channel);
     setLoadingMessages(true);
@@ -354,29 +322,30 @@ export default function MessagesPage() {
       const ids = [currentUserId, channel.id].sort();
       key = `dm_${ids[0]}_${ids[1]}`;
     }
+    activeChannelKeyRef.current = key;
     markChannelAsRead(key);
   };
 
-  // Channel switch & background polling (Optimized lifecycle: 0 effect cascade loops)
+  // Optimized Channel switch & background polling lifecycle
   useEffect(() => {
     isInitialLoadRef.current = true;
     prevMsgCountRef.current = 0;
 
     const t = setTimeout(() => {
       void fetchMessagesForActiveChannel().finally(() => setLoadingMessages(false));
-      void fetchUnreadCounts();
+      void refreshUnreadCounts();
     }, 0);
 
     const interval = setInterval(() => {
       void fetchMessagesForActiveChannel();
-      void fetchUnreadCounts();
+      void refreshUnreadCounts();
     }, 4000);
 
     return () => {
       clearTimeout(t);
       clearInterval(interval);
     };
-  }, [activeChannel.id, activeChannel.type, currentUserId, fetchMessagesForActiveChannel, fetchUnreadCounts]);
+  }, [activeChannel.id, activeChannel.type, currentUserId, fetchMessagesForActiveChannel, refreshUnreadCounts]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -397,7 +366,7 @@ export default function MessagesPage() {
     setSending(false);
 
     if (res.success && res.message) {
-      void fetchMessagesForActiveChannel().then(() => {
+      void fetchMessagesForActiveChannel(true).then(() => {
         setTimeout(() => scrollToBottom('smooth'), 50);
         setHasUnreadBelow(false);
       });
@@ -409,14 +378,51 @@ export default function MessagesPage() {
     setShowEmojiMenuMsgId(null);
     if (!confirm('Are you sure you want to delete this message?')) return;
     await deleteChatMessage(msgId);
-    void fetchMessagesForActiveChannel();
+    void fetchMessagesForActiveChannel(true);
   };
 
   const handleReact = async (msgId: string, emoji: string) => {
     setShowEmojiMenuMsgId(null);
     setMobileActionMenuMsgId(null);
-    await toggleMessageReaction(msgId, emoji);
-    void fetchMessagesForActiveChannel();
+
+    if (!currentUserId) return;
+
+    // Optimistic reaction toggle in React state (<16ms response)
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== msgId) return msg;
+
+        const currentUserName = session?.user?.name || 'User';
+        const existingIdx = msg.reactions.findIndex(
+          (r) => r.emoji === emoji && r.userId === currentUserId
+        );
+
+        const updatedReactions = [...msg.reactions];
+        if (existingIdx >= 0) {
+          updatedReactions.splice(existingIdx, 1);
+        } else {
+          updatedReactions.push({
+            id: `temp-${Date.now()}`,
+            emoji,
+            userId: currentUserId,
+            userName: currentUserName,
+          });
+        }
+
+        return {
+          ...msg,
+          reactions: updatedReactions,
+        };
+      })
+    );
+
+    try {
+      await toggleMessageReaction(msgId, emoji);
+    } catch (err) {
+      console.error('toggleMessageReaction error:', err);
+    } finally {
+      void fetchMessagesForActiveChannel(true);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -645,7 +651,8 @@ export default function MessagesPage() {
                 <p>Send a message below to start communicating with your team.</p>
               </div>
             ) : (
-              messages.map((msg) => {
+              messages.map((msg, idx) => {
+                const isTopMsg = idx < 2;
                 const reactionGroups: Record<string, { count: number; users: string[]; hasReacted: boolean }> = {};
                 msg.reactions.forEach((r) => {
                   if (!reactionGroups[r.emoji]) {
@@ -675,11 +682,14 @@ export default function MessagesPage() {
                     <div className="relative max-w-md space-y-1 min-w-0">
                       {/* Desktop Hover Action Pill */}
                       <div
-                        className={`hidden md:flex absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-1 items-center gap-1 z-10 shadow-lg ${
+                        className={`hidden md:flex absolute top-0 transition-opacity bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-1 items-center gap-1 shadow-lg ${
+                          showEmojiMenuMsgId === msg.id ? 'opacity-100 z-30 pointer-events-auto' : 'opacity-0 group-hover:opacity-100 z-10'
+                        } ${
                           msg.isSelf ? 'right-full mr-2' : 'left-full ml-2'
                         }`}
                       >
                         <button
+                          type="button"
                           onClick={() => setReplyingMsg(msg)}
                           title="Reply"
                           className="p-1.5 hover:bg-[var(--bg-card-hover)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
@@ -688,9 +698,11 @@ export default function MessagesPage() {
                         </button>
                         <div className="relative">
                           <button
-                            onClick={() =>
-                              setShowEmojiMenuMsgId(showEmojiMenuMsgId === msg.id ? null : msg.id)
-                            }
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEmojiMenuMsgId(showEmojiMenuMsgId === msg.id ? null : msg.id);
+                            }}
                             title="React"
                             className="p-1.5 hover:bg-[var(--bg-card-hover)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                           >
@@ -698,12 +710,21 @@ export default function MessagesPage() {
                           </button>
 
                           {showEmojiMenuMsgId === msg.id && (
-                            <div className="absolute bottom-full mb-2 left-0 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-2 flex gap-1 shadow-2xl z-20">
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className={`absolute ${isTopMsg ? 'top-full mt-2' : 'bottom-full mb-2'} ${
+                                msg.isSelf ? 'right-0' : 'left-0'
+                              } bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl p-2 flex gap-1.5 shadow-2xl z-40 whitespace-nowrap`}
+                            >
                               {EMOJI_LIST.map((emoji) => (
                                 <button
                                   key={emoji}
-                                  onClick={() => handleReact(msg.id, emoji)}
-                                  className="hover:scale-125 transition-transform p-1 text-sm cursor-pointer"
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleReact(msg.id, emoji);
+                                  }}
+                                  className="hover:scale-125 transition-transform p-1.5 text-base cursor-pointer"
                                 >
                                   {emoji}
                                 </button>
@@ -840,49 +861,56 @@ export default function MessagesPage() {
 
                       {/* Mobile Action Menu Popover */}
                       {mobileActionMenuMsgId === msg.id && (
-                        <div className="md:hidden mt-2 p-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl space-y-2 z-20">
-                          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-1.5">
-                            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">
-                              Actions
+                        <div className="md:hidden mt-2 p-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-2xl space-y-3 z-40 w-full min-w-[220px]">
+                          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                              Message Actions
                             </span>
                             <button
+                              type="button"
                               onClick={() => setMobileActionMenuMsgId(null)}
-                              className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              <X className="w-4 h-4" />
                             </button>
                           </div>
 
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <button
+                              type="button"
                               onClick={() => {
                                 setReplyingMsg(msg);
                                 setMobileActionMenuMsgId(null);
                               }}
-                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--bg-card-hover)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[#4E75FF] hover:text-white transition-colors cursor-pointer"
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-card-hover)] text-xs font-semibold text-[var(--text-primary)] active:bg-[#4E75FF] active:text-white transition-colors cursor-pointer"
                             >
-                              <Reply className="w-3.5 h-3.5" />
+                              <Reply className="w-4 h-4" />
                               <span>Reply</span>
                             </button>
 
                             {(msg.isSelf || session?.user?.role === 'ADMIN') && (
                               <button
+                                type="button"
                                 onClick={() => handleDelete(msg.id)}
-                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-xs font-semibold text-rose-500 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 text-xs font-semibold text-rose-500 active:bg-rose-500 active:text-white transition-colors cursor-pointer"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" />
                                 <span>Delete</span>
                               </button>
                             )}
                           </div>
 
                           {/* Mobile Emoji Reaction Row */}
-                          <div className="flex items-center gap-1 pt-1 border-t border-[var(--border-color)] overflow-x-auto">
+                          <div className="flex items-center justify-between gap-1 pt-2 border-t border-[var(--border-color)] overflow-x-auto scrollbar-none">
                             {EMOJI_LIST.map((emoji) => (
                               <button
                                 key={emoji}
-                                onClick={() => handleReact(msg.id, emoji)}
-                                className="p-1.5 rounded-lg hover:bg-[var(--bg-card-hover)] text-sm transition-transform active:scale-125 cursor-pointer"
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReact(msg.id, emoji);
+                                }}
+                                className="p-2.5 rounded-xl hover:bg-[var(--bg-card-hover)] text-base transition-transform active:scale-125 cursor-pointer shrink-0 touch-manipulation"
                               >
                                 {emoji}
                               </button>
@@ -897,10 +925,14 @@ export default function MessagesPage() {
                           {Object.entries(reactionGroups).map(([emoji, group]) => (
                             <button
                               key={emoji}
-                              onClick={() => handleReact(msg.id, emoji)}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleReact(msg.id, emoji);
+                              }}
                               className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors cursor-pointer ${
                                 group.hasReacted
-                                  ? 'bg-[#4E75FF]/20 border-[#5B82FF] text-[var(--text-primary)]'
+                                  ? 'bg-[#4E75FF]/20 border-[#5B82FF] text-[var(--text-primary)] font-bold'
                                   : 'bg-[var(--bg-card-hover)] border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                               }`}
                             >

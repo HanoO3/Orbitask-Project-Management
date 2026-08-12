@@ -127,7 +127,7 @@ export default function ProjectsPage() {
   const userRole = session?.user?.role;
 
   const getProjectHref = (projectId: string) => {
-    return `/manager/projects/${projectId}`;
+    return `/projects/${projectId}`;
   };
 
   return (

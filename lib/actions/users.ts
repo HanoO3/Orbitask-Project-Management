@@ -15,7 +15,7 @@ async function requireAdmin() {
 
 export async function getUsers() {
   await requireAdmin();
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -26,6 +26,11 @@ export async function getUsers() {
       createdAt: true,
     },
   });
+
+  return users.map((u) => ({
+    ...u,
+    createdAt: u.createdAt ? new Date(u.createdAt).toISOString() : '',
+  }));
 }
 
 export async function getWorkspaceUsers() {

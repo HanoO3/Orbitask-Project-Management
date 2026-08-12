@@ -22,10 +22,13 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { LogoutButton } from '@/components/logout-button';
 import { useMobileNav } from '@/components/app-layout';
 
+import { useChatUnread } from '@/components/providers/chat-unread-context';
+
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { mobileOpen, toggleMobileNav, closeMobileNav } = useMobileNav();
+  const { totalUnreadChatCount } = useChatUnread();
   const [searchQuery, setSearchQuery] = useState('');
 
   const role = session?.user?.role;
@@ -176,7 +179,14 @@ export function Sidebar() {
                         active ? 'text-white' : 'text-[var(--text-secondary)]'
                       }`}
                     />
-                    <span>{item.label}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.label === 'Messages' && totalUnreadChatCount > 0 && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs ${
+                        active ? 'bg-white text-[#4E75FF]' : 'bg-[#4E75FF] text-white'
+                      }`}>
+                        {totalUnreadChatCount > 99 ? '99+' : totalUnreadChatCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })

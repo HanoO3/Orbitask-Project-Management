@@ -92,22 +92,22 @@ export default function ManagerDashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Total Projects</p>
+        <Link href="/projects" className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#5B82FF]/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group">
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[#5B82FF] transition-colors">Total Projects</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] mt-1.5">{stats.totalProjects}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Active Projects</p>
+        </Link>
+        <Link href="/projects" className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-500/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group">
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-blue-500 transition-colors">Active Projects</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-[#5B82FF] mt-1.5">{stats.activeProjects}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Pending Tasks</p>
+        </Link>
+        <Link href="/tasks?status=TODO" className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-amber-500/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group">
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-amber-500 transition-colors">Pending Tasks</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5">{stats.pendingTasks}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Completed Tasks</p>
+        </Link>
+        <Link href="/tasks?status=COMPLETED" className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-emerald-500/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group">
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-emerald-500 transition-colors">Completed Tasks</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5">{stats.completedTasks}</p>
-        </div>
+        </Link>
       </div>
 
       {/* Projects List */}
@@ -128,7 +128,7 @@ export default function ManagerDashboard() {
               return (
                 <Link
                   key={project.id}
-                  href={`/manager/projects/${project.id}`}
+                  href={`/projects/${project.id}`}
                   className="bg-[var(--bg-card-hover)] border border-[var(--border-color)] p-5 rounded-2xl hover:border-[#5B82FF]/50 transition block space-y-3 cursor-pointer"
                 >
                   <div className="flex items-center justify-between">

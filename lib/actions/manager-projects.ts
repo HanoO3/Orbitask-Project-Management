@@ -72,7 +72,7 @@ export async function getMyProjectStats() {
 export async function getProjectById(projectId: string) {
   await requireOwnedProject(projectId);
 
-  return prisma.project.findUnique({
+  const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
       manager: { select: { id: true, name: true, email: true } },
@@ -90,10 +90,28 @@ export async function getProjectById(projectId: string) {
       },
     },
   });
+
+  if (!project) return null;
+
+  return {
+    ...project,
+    startDate: project.startDate ? new Date(project.startDate).toISOString() : '',
+    endDate: project.endDate ? new Date(project.endDate).toISOString() : '',
+    createdAt: project.createdAt ? new Date(project.createdAt).toISOString() : '',
+    updatedAt: project.updatedAt ? new Date(project.updatedAt).toISOString() : '',
+    tasks: project.tasks.map((t) => ({
+      ...t,
+      dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : '',
+      createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : '',
+      updatedAt: t.updatedAt ? new Date(t.updatedAt).toISOString() : '',
+    })),
+  };
 }
 
 export async function getAvailableTeamMembers(projectId: string) {
-  await requireOwnedProject(projectId);
+  const session = await auth();
+  if (!session?.user?.id) return [];
+  if (session.user.role !== "ADMIN" && session.user.role !== "PROJECT_MANAGER") return [];
 
   return prisma.user.findMany({
     where: {
@@ -106,7 +124,8 @@ export async function getAvailableTeamMembers(projectId: string) {
 }
 
 export async function getAssignableMembers(projectId: string) {
-  await requireOwnedProject(projectId);
+  const session = await auth();
+  if (!session?.user?.id) return [];
 
   return prisma.user.findMany({
     where: {
@@ -165,6 +184,9 @@ export async function createTask(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await requireOwnedProject(projectId);
+    if (session.user.role === "TEAM_MEMBER") {
+      return { success: false, error: "Unauthorized: Team members cannot create tasks." };
+    }
 
     await prisma.task.create({
       data: {
@@ -208,7 +230,10 @@ export async function updateTask(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await requireOwnedProject(projectId);
+    const session = await requireOwnedProject(projectId);
+    if (session.user.role === "TEAM_MEMBER") {
+      return { success: false, error: "Unauthorized: Team members cannot modify task details." };
+    }
 
     const previousTask = await prisma.task.findUnique({ where: { id: taskId } });
 
@@ -242,7 +267,10 @@ export async function updateTask(
 }
 
 export async function deleteTask(taskId: string, projectId: string) {
-  await requireOwnedProject(projectId);
+  const session = await requireOwnedProject(projectId);
+  if (session.user.role === "TEAM_MEMBER") {
+    throw new Error("Unauthorized: Team members cannot delete tasks.");
+  }
   await prisma.task.delete({ where: { id: taskId } });
   revalidatePath(`/manager/projects/${projectId}`);
   return { success: true };

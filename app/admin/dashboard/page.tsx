@@ -49,26 +49,41 @@ export default async function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Total Users</p>
+        <Link
+          href="/admin/users"
+          className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#5B82FF]/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group"
+        >
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[#5B82FF] transition-colors">Total Users</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] mt-1.5">{totalUsers}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Projects</p>
+        </Link>
+        <Link
+          href="/projects"
+          className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#5B82FF]/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group"
+        >
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[#5B82FF] transition-colors">Projects</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-[#5B82FF] mt-1.5">{totalProjects}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Total Tasks</p>
+        </Link>
+        <Link
+          href="/tasks"
+          className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-purple-500/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group"
+        >
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-purple-500 transition-colors">Total Tasks</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-purple-600 dark:text-purple-400 mt-1.5">{totalTasks}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Managers</p>
+        </Link>
+        <Link
+          href="/admin/users?role=PROJECT_MANAGER"
+          className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-indigo-500/50 rounded-2xl p-4 sm:p-5 transition-all shadow-xs block cursor-pointer group"
+        >
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-indigo-500 transition-colors">Managers</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1.5">{managersCount}</p>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 col-span-2 sm:col-span-1 transition-colors">
-          <p className="text-xs font-medium text-[var(--text-secondary)]">Team Members</p>
+        </Link>
+        <Link
+          href="/admin/users?role=TEAM_MEMBER"
+          className="bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-emerald-500/50 rounded-2xl p-4 sm:p-5 col-span-2 sm:col-span-1 transition-all shadow-xs block cursor-pointer group"
+        >
+          <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-emerald-500 transition-colors">Team Members</p>
           <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5">{membersCount}</p>
-        </div>
+        </Link>
       </div>
 
       {/* Action Cards */}

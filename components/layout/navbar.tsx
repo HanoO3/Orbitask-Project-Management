@@ -18,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewTaskModal,
 }) => {
   const { data: session } = useSession();
+  const canManageTasks = session?.user?.role === 'ADMIN' || session?.user?.role === 'PROJECT_MANAGER';
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const userName = session?.user?.name || 'User';
@@ -46,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <ThemeToggle />
 
           {/* + New Task Button */}
-          {onOpenNewTaskModal && (
+          {canManageTasks && onOpenNewTaskModal && (
             <button
               onClick={onOpenNewTaskModal}
               className="flex items-center gap-1.5 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-[0_4px_12px_rgba(78,117,255,0.3)] hover:shadow-[0_6px_16px_rgba(78,117,255,0.4)] transition-all active:scale-95 cursor-pointer"
@@ -113,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <h1 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
           {title}
         </h1>
-        {onOpenNewTaskModal && (
+        {canManageTasks && onOpenNewTaskModal && (
           <button
             onClick={onOpenNewTaskModal}
             className="flex items-center gap-1 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3 py-1.5 rounded-lg font-medium text-xs shadow-md transition-all active:scale-95 cursor-pointer"

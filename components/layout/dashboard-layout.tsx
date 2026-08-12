@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Navbar } from './navbar';
 import { NewTaskModal } from '@/components/modals/new-task-modal';
 import { Task } from '@/types';
@@ -16,6 +17,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   title = 'Dashboard',
   onAddTask,
 }) => {
+  const { data: session } = useSession();
+  const canManageTasks = session?.user?.role === 'ADMIN' || session?.user?.role === 'PROJECT_MANAGER';
   const [newTaskModalOpen, setNewTaskModalOpen] = useState(false);
 
   const handleAddTask = (newTask: Omit<Task, 'id' | 'completed'>) => {
@@ -29,7 +32,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Top Navbar Header */}
       <Navbar
         title={title}
-        onOpenNewTaskModal={() => setNewTaskModalOpen(true)}
+        onOpenNewTaskModal={canManageTasks ? () => setNewTaskModalOpen(true) : undefined}
       />
 
       {/* Page Content Container */}
@@ -38,11 +41,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </main>
 
       {/* New Task Dialog Modal */}
-      <NewTaskModal
-        isOpen={newTaskModalOpen}
-        onClose={() => setNewTaskModalOpen(false)}
-        onAddTask={handleAddTask}
-      />
+      {canManageTasks && (
+        <NewTaskModal
+          isOpen={newTaskModalOpen}
+          onClose={() => setNewTaskModalOpen(false)}
+          onAddTask={handleAddTask}
+        />
+      )}
     </div>
   );
 };

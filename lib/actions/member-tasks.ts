@@ -5,18 +5,11 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "@/lib/actions/notifications";
 
-async function requireMember() {
-  const session = await auth();
-  if (session?.user?.role !== "TEAM_MEMBER") {
-    throw new Error("Unauthorized: Team Member access required");
-  }
-  return session;
-}
-
 export async function getMyMemberProjects() {
-  const session = await requireMember();
+  const session = await auth();
+  if (!session?.user?.id) return [];
 
-  return prisma.project.findMany({
+  const projects = await prisma.project.findMany({
     where: {
       members: {
         some: { userId: session.user.id },
@@ -36,17 +29,26 @@ export async function getMyMemberProjects() {
       },
     },
   });
+
+  return projects.map((p) => ({
+    ...p,
+    startDate: p.startDate ? new Date(p.startDate).toISOString() : '',
+    endDate: p.endDate ? new Date(p.endDate).toISOString() : '',
+    createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : '',
+    updatedAt: p.updatedAt ? new Date(p.updatedAt).toISOString() : '',
+  }));
 }
 
 export async function getMyTasks(scope: "assigned" | "all_project_tasks" = "assigned") {
-  const session = await requireMember();
+  const session = await auth();
+  if (!session?.user?.id) return [];
 
   const whereClause =
     scope === "all_project_tasks"
       ? { project: { members: { some: { userId: session.user.id } } } }
       : { assigneeId: session.user.id };
 
-  return prisma.task.findMany({
+  const tasks = await prisma.task.findMany({
     where: whereClause,
     orderBy: { dueDate: "asc" },
     include: {
@@ -55,10 +57,20 @@ export async function getMyTasks(scope: "assigned" | "all_project_tasks" = "assi
       _count: { select: { comments: true } },
     },
   });
+
+  return tasks.map((t) => ({
+    ...t,
+    dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : '',
+    createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : '',
+    updatedAt: t.updatedAt ? new Date(t.updatedAt).toISOString() : '',
+  }));
 }
 
 export async function getMyTaskStats() {
-  const session = await requireMember();
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { totalProjects: 0, totalTasks: 0, pendingTasks: 0, completedTasks: 0, overdueTasks: 0 };
+  }
 
   const [projectsCount, tasks] = await Promise.all([
     prisma.project.count({
@@ -92,11 +104,14 @@ export async function updateMyTaskStatus(
   taskId: string,
   status: "TODO" | "IN_PROGRESS" | "REVIEW" | "COMPLETED"
 ) {
-  const session = await requireMember();
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
-  if (!task || task.assigneeId !== session.user.id) {
-    throw new Error("Unauthorized: Not your task");
+  if (!task || (session.user.role === "TEAM_MEMBER" && task.assigneeId !== session.user.id)) {
+    return { success: false, error: "Unauthorized: Not your task" };
   }
 
   await prisma.task.update({
@@ -104,7 +119,13 @@ export async function updateMyTaskStatus(
     data: { status },
   });
 
-  if (status === "COMPLETED") {
+  if (status === "REVIEW") {
+    await createNotification(
+      task.creatorId,
+      "TASK_STATUS_UPDATED",
+      `Task "${task.title}" was submitted for review by ${session.user.name}`
+    );
+  } else if (status === "COMPLETED") {
     await createNotification(
       task.creatorId,
       "TASK_STATUS_UPDATED",
@@ -117,7 +138,10 @@ export async function updateMyTaskStatus(
 }
 
 export async function getMemberWorkspaceOverview() {
-  const session = await requireMember();
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { totalWorkspaceUsers: 0, recentUsers: [], recentTasks: [] };
+  }
 
   const [totalWorkspaceUsers, recentUsers, recentTasks] = await Promise.all([
     prisma.user.count(),
@@ -144,6 +168,11 @@ export async function getMemberWorkspaceOverview() {
   return {
     totalWorkspaceUsers,
     recentUsers,
-    recentTasks,
+    recentTasks: recentTasks.map((t) => ({
+      ...t,
+      dueDate: t.dueDate ? new Date(t.dueDate).toISOString() : '',
+      createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : '',
+      updatedAt: t.updatedAt ? new Date(t.updatedAt).toISOString() : '',
+    })),
   };
 }

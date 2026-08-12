@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 export async function getProfile() {
   const session = await auth();
   if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+    return null;
   }
 
   const userId = session.user.id;
@@ -44,11 +44,12 @@ export async function getProfile() {
   ]);
 
   if (!user) {
-    throw new Error("User not found");
+    return null;
   }
 
   return {
     ...user,
+    createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : '',
     stats: {
       projectsCount,
       tasksCount,

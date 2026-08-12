@@ -13,6 +13,7 @@ import {
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DashboardGreeting } from "@/components/dashboard/dashboard-greeting";
+import { BackButton } from "@/components/back-button";
 import { CheckSquare, Clock, CheckCircle2, FolderKanban, Users } from "lucide-react";
 import { AnalyticsSection } from "@/components/analytics/analytics-section";
 import { ActivityTimeline } from "@/components/activity/activity-timeline";
@@ -129,7 +130,6 @@ export default function MemberDashboard() {
     recentUsers: [],
     recentTasks: [],
   });
-  const [taskScope, setTaskScope] = useState<"assigned" | "all_project_tasks">("assigned");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -143,7 +143,7 @@ export default function MemberDashboard() {
     try {
       const [projectsData, tasksData, statsData, overviewData] = await Promise.all([
         getMyMemberProjects(),
-        getMyTasks(taskScope),
+        getMyTasks("assigned"),
         getMyTaskStats(),
         getMemberWorkspaceOverview(),
       ]);
@@ -155,7 +155,7 @@ export default function MemberDashboard() {
       console.error("Failed to load member dashboard data:", err);
     }
     setLoading(false);
-  }, [taskScope]);
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => void loadData(), 0);
@@ -192,9 +192,8 @@ export default function MemberDashboard() {
         <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <Link
             href="/tasks"
-            className="inline-flex items-center gap-2 bg-[#4E75FF] hover:bg-[#5B82FF] text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition cursor-pointer"
+            className="flex items-center gap-1.5 bg-[#4E75FF] hover:bg-[#5B82FF] text-white px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-[0_4px_12px_rgba(78,117,255,0.3)] hover:shadow-[0_6px_16px_rgba(78,117,255,0.4)] transition-all active:scale-95 cursor-pointer"
           >
-            <span>+</span>
             <span>View Tasks</span>
           </Link>
 
@@ -211,9 +210,9 @@ export default function MemberDashboard() {
       {/* 4 Top Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Tasks */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
+        <Link href="/tasks" className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#5B82FF]/60 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Total Tasks</span>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[#5B82FF] transition-colors">Total Tasks</span>
             <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20 flex items-center justify-center">
               <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
@@ -221,15 +220,15 @@ export default function MemberDashboard() {
           <div className="flex items-baseline justify-between">
             <span className="text-3xl font-extrabold text-[var(--text-primary)]">{stats.totalTasks}</span>
             <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-500/10 px-2 py-0.5 rounded-full">
-              {taskScope === "assigned" ? "Assigned" : "Project"}
+              Assigned
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Pending Tasks */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
+        <Link href="/tasks?status=IN_PROGRESS" className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-amber-500/60 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">In Progress</span>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-amber-500 transition-colors">In Progress</span>
             <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/20 flex items-center justify-center">
               <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
@@ -240,12 +239,12 @@ export default function MemberDashboard() {
               Pending
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Completed Tasks */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
+        <Link href="/tasks?status=COMPLETED" className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/60 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Completed</span>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-emerald-500 transition-colors">Completed</span>
             <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
@@ -256,12 +255,12 @@ export default function MemberDashboard() {
               {completionPercent}% Rate
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Active Projects */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-[#5B82FF]/40 transition-colors">
+        <Link href="/projects" className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/60 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Active Projects</span>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-purple-500 transition-colors">Active Projects</span>
             <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/20 flex items-center justify-center">
               <FolderKanban className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
@@ -272,7 +271,7 @@ export default function MemberDashboard() {
               Active
             </span>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Main Grid: My Active Projects (2 Cols) + Real Recent Activity (1 Col) */}
@@ -284,12 +283,7 @@ export default function MemberDashboard() {
               <h2 className="text-lg font-bold text-[var(--text-primary)]">Active Projects</h2>
               <p className="text-xs text-[var(--text-secondary)]">Projects you are contributing to</p>
             </div>
-            <Link
-              href="/projects"
-              className="text-xs font-semibold text-[#5B82FF] hover:underline transition"
-            >
-              View All →
-            </Link>
+            <BackButton href="/projects" label="View All" iconPosition="right" />
           </div>
 
           {loading ? (
@@ -305,10 +299,14 @@ export default function MemberDashboard() {
                 const statusInfo = projectStatusStyle(project.status);
 
                 return (
-                  <div key={project.id} className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] space-y-3">
+                  <Link
+                    key={project.id}
+                    href={`/projects/${project.id}`}
+                    className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] hover:border-[#5B82FF]/60 space-y-3 block transition-all cursor-pointer group"
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold text-sm text-[var(--text-primary)]">{project.name}</h3>
+                        <h3 className="font-bold text-sm text-[var(--text-primary)] group-hover:text-[#5B82FF] transition-colors">{project.name}</h3>
                         <p className="text-[11px] text-[var(--text-secondary)]" suppressHydrationWarning>
                           Manager: {project.manager.name} • Due {mounted ? formatDate(project.endDate) : ""}
                         </p>
@@ -357,7 +355,7 @@ export default function MemberDashboard() {
                         {progress}%
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -401,74 +399,72 @@ export default function MemberDashboard() {
         </div>
       </div>
 
-      {/* Bottom Section: My Tasks Checklist & Workspace Banner */}
+      {/* Bottom Section: My Assigned Tasks */}
       <div className="space-y-6">
-        {/* My Tasks Card */}
+        {/* My Assigned Tasks Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 transition-colors">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">My Tasks</h2>
-              <p className="text-xs text-[var(--text-secondary)]">Tasks assigned to you</p>
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">My Assigned Tasks</h2>
+              <p className="text-xs text-[var(--text-secondary)]">Tasks specifically assigned to you</p>
             </div>
-
-            <div className="flex items-center gap-3">
-              <select
-                value={taskScope}
-                onChange={(e) => setTaskScope(e.target.value as "assigned" | "all_project_tasks")}
-                className="bg-[var(--bg-input)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#5B82FF] cursor-pointer"
-              >
-                <option value="assigned">Assigned to Me</option>
-                <option value="all_project_tasks">All Project Tasks</option>
-              </select>
-            </div>
+            <BackButton href="/tasks" label="View All Tasks" iconPosition="right" />
           </div>
 
           {loading ? (
-            <p className="text-xs text-[var(--text-muted)] py-6">Loading tasks...</p>
+            <p className="text-xs text-[var(--text-muted)] py-6">Loading assigned tasks...</p>
           ) : tasks.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)] py-6 text-center">No tasks assigned yet.</p>
           ) : (
-            <div className="divide-y divide-[var(--border-color)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {tasks.map((task) => {
                 const isCompleted = task.status === "COMPLETED";
                 return (
                   <div
                     key={task.id}
-                    className="py-3.5 flex items-center justify-between gap-4 group hover:bg-[var(--bg-card-hover)] px-2 rounded-xl transition-colors"
+                    className="p-4 rounded-xl bg-[var(--bg-card-hover)] border border-[var(--border-color)] hover:border-[#5B82FF]/60 space-y-3 transition-all group"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <button
-                        onClick={() => handleStatusChange(task.id, task.status)}
-                        disabled={updatingId === task.id}
-                        className={`w-5 h-5 rounded-md border flex items-center justify-center transition shrink-0 cursor-pointer ${
-                          isCompleted
-                            ? "bg-[#4E75FF] border-[#4E75FF] text-white"
-                            : "border-[var(--border-color)] hover:border-[#5B82FF] text-transparent bg-[var(--bg-input)]"
-                        }`}
-                      >
-                        ✓
-                      </button>
-                      <div className="min-w-0">
-                        <Link
-                          href={`/tasks/${task.id}`}
-                          className={`text-sm font-semibold block truncate ${
-                            isCompleted ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)] hover:text-[#5B82FF]"
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <button
+                          onClick={() => handleStatusChange(task.id, task.status)}
+                          disabled={updatingId === task.id}
+                          title={isCompleted ? "Mark incomplete" : "Mark complete"}
+                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition shrink-0 cursor-pointer ${
+                            isCompleted
+                              ? "bg-[#4E75FF] border-[#4E75FF] text-white"
+                              : "border-[var(--border-color)] hover:border-[#5B82FF] text-transparent bg-[var(--bg-input)]"
                           }`}
                         >
-                          {task.title}
-                        </Link>
-                        <p className="text-[11px] text-[var(--text-secondary)] truncate">{task.project.name}</p>
+                          ✓
+                        </button>
+                        <div className="min-w-0">
+                          <Link
+                            href={`/tasks/${task.id}`}
+                            className={`text-sm font-bold block truncate transition-colors ${
+                              isCompleted ? "line-through text-[var(--text-muted)]" : "text-[var(--text-primary)] group-hover:text-[#5B82FF]"
+                            }`}
+                          >
+                            {task.title}
+                          </Link>
+                          <p className="text-[11px] font-medium text-[var(--text-secondary)] truncate">
+                            Project: {task.project.name}
+                          </p>
+                        </div>
                       </div>
+
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold shrink-0 ${priorityBadgeStyle(task.priority)}`}>
+                        {task.priority}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-[var(--text-secondary)] hidden sm:flex items-center gap-1" suppressHydrationWarning>
-                        <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                        <span>{mounted ? formatDate(task.dueDate) : ""}</span>
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-400">
+                        {task.status.replace("_", " ")}
                       </span>
-
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${priorityBadgeStyle(task.priority)}`}>
-                        {task.priority}
+                      <span className="text-[11px] flex items-center gap-1 text-[var(--text-muted)]" suppressHydrationWarning>
+                        <Clock className="w-3.5 h-3.5 text-[#5B82FF]" />
+                        <span>Due {mounted ? formatDate(task.dueDate) : ""}</span>
                       </span>
                     </div>
                   </div>
